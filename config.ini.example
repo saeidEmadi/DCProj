@@ -1,0 +1,6 @@
+[Traffic Camera]
+yoloVersion = YOLO_VERSION
+
+[Server Address]
+server = IP_ADDRESS
+port = PORT_NUMBER
