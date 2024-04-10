@@ -1,14 +1,17 @@
+import ipaddress
 #from ultralytics import YOLO
 #model = YOLO('yolov9e.pt')
 
 class Camera:
     """ Camera Class : \
         track objects and detect Traffic """
-    def __init__(self, serverIP, serverPort):
+    def __init__(self, serverIP : str, portNumber : int):
         """ initial variables """
+        self.serverIP = serverIP
+        self.portNumber = portNumber
         pass
     
-    def netConfig(self, serverIP, serverPort):
+    def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
         pass
     
@@ -39,19 +42,31 @@ class Camera:
     @property
     def serverIP(self):
         """ return server IP """
-        pass
+        return self.__serverIP
     
     @serverIP.setter
-    def serverIP(self, serverIP):
+    def serverIP(self, serverIP : str):
         """ set server IP """
-        pass
+        try:
+            ipaddress.ip_address(serverIP)
+            self.__serverIP = serverIP
+        except:
+            raise ValueError("ip Address invalid, valid Types : [IPv4,IPv6]")
     
     @property
-    def serverPort(self):
-        """ return server Port """
+    def portNumber(self):
+        """ return server Port Number """
+        return self.__portNumber
         pass
     
-    @serverPort.setter
-    def serverPort(self, serverPort):
-        """ set server Port """
-        pass
+    @portNumber.setter
+    def portNumber(self, portNumber : int):
+        """ set server Port Number """
+        
+        if not isinstance(portNumber, int):
+            raise ValueError("port number only integer valid")
+        
+        if not 1 <= portNumber <= 65535 :
+            raise ValueError("port number invalid")
+        
+        self.__portNumber = portNumber
