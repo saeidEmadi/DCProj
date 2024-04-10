@@ -1,25 +1,38 @@
 import ipaddress
+import socket
+import configparser
 #from ultralytics import YOLO
-#model = YOLO('yolov9e.pt')
-
+import re
 class Camera:
     """ Camera Class : \
         track objects and detect Traffic """
-    def __init__(self, serverIP : str, portNumber : int):
+        
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    
+    def __init__(self, serverIP : str = config['Server Address']['server'], \
+        portNumber : int = int(config['Server Address']['port']), \
+        yoloVersion : str = 'yolov9e.pt'):
+        
         """ initial variables """
         self.serverIP = serverIP
         self.portNumber = portNumber
-        pass
+        self.bondedBox = False
+        self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.yoloVersion = yoloVersion
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
-        pass
+        self.serverIP = serverIP
+        self.portNumber = portNumber
     
-    def connectionCheck():
-        """ check connection socket """
-        pass
+    def __startConnection(self):
+        """ start connection socket """
+        self.__socket.connect((self.__serverIP, self.__portNumber))
+        self.__socket.send('camera connected'.encode())
+        
     
-    def reporter():
+    def reporter(self):
         """ send traffic report the C&C """
         pass
     
@@ -31,14 +44,26 @@ class Camera:
         """ real-Time Camera """
         pass
     
-    def detector(self, detect):
+    def detector(self, detect = 'vehicles'):
         """ for determine detect all labels or vehicles """
         pass
     
-    def yVersion(self, version):
-        """ detect yolo version and download """
+    def run(self):
+        """ run camera and connect to server """
+        self.__startConnection()
         pass
-    
+        
+    @property
+    def yoloVersion(self):
+        return self.__yoloVersion
+        
+    @yoloVersion.setter
+    def yoloVersion(self,ver):
+        if not re.match('^\S{5}\d\S*\.pt$',ver):
+            raise ValueError("Yolo Version is not vaild")
+        
+        self.__yoloVersion = ver
+        
     @property
     def serverIP(self):
         """ return server IP """
@@ -57,7 +82,6 @@ class Camera:
     def portNumber(self):
         """ return server Port Number """
         return self.__portNumber
-        pass
     
     @portNumber.setter
     def portNumber(self, portNumber : int):
@@ -70,3 +94,14 @@ class Camera:
             raise ValueError("port number invalid")
         
         self.__portNumber = portNumber
+        
+    @property
+    def bondedBox(self):
+        return "Bonded box : " + str(self.__bondedBox)
+    
+    @bondedBox.setter
+    def bondedBox(self,val):
+        if val not in list((True,False)):
+            raise ValueError('boded box value invalid')
+        
+        self.__bondedBox = val
