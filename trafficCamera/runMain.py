@@ -26,6 +26,7 @@ class Camera(threading.Thread):
         
         # define global _debug for validate Debug mode
         global _debug
+        self.__count = 0
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.bondedBox = False
@@ -56,7 +57,7 @@ class Camera(threading.Thread):
         """ start connection socket """
         try:
             self.__socket.connect((self.__serverIP, self.__portNumber))
-            self.__socket.send(f'camera connected NO. {threading.get_ident()}'.encode())
+            self.__socket.send(f'camera connected NO. {threading.current_thread().ident}'.encode())
         except : 
             raise ConnectionError(f"can't connect to server, {self.__serverIP}:{self.__portNumber}")
         
@@ -70,8 +71,9 @@ class Camera(threading.Thread):
             print(f"\n**[connection closed]**\n")
     
     def reporter(self):
+        """ Threading Function """
         """ send traffic report the C&C """
-        pass
+        self.__socket.send(f'camera NO. {threading.current_thread().ident} | count : {self.__count}'.encode())
     
     def videoLoader(self, source):
         """ determine video source """
@@ -88,12 +90,12 @@ class Camera(threading.Thread):
     def run(self):
         """ run camera and connect to server """
         self.__startConnection()
-        print(f"\n<camera NO. {threading.get_ident()} available>\n")
+        self.reporter()
         # self.__closeConnection()
         
         if _debug :
             print(f"\n<< [app start running : Debug mode] >>\n")
-            print(f"\n<< [ camera NO. {threading.get_ident()} ] >>\n")
+            print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
         
     @property
     def yoloVersion(self):
