@@ -2,6 +2,7 @@ import ipaddress
 import socket
 import configparser
 import threading
+import time
 #from ultralytics import YOLO
 import re
 class Camera(threading.Thread):
@@ -89,6 +90,8 @@ class Camera(threading.Thread):
         """ run camera and connect to server """
         self.__startConnection()
         print(f"\n<camera NO. {threading.get_ident()} available>\n")
+        time.sleep(60)
+        self.__closeConnection()
         
         if _debug :
             print(f"\n<< [app start running : Debug mode] >>\n")
