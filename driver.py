@@ -17,6 +17,7 @@ if __name__ == "__main__":
     argparser.add_argument('-d', '--detect', metavar = 'detectObjects', default = 'vehicles', type = str, nargs = 1, choices=['all', 'vehicles'], help = "detect all objects in ms-COCO or only vehicles (choices : [all,vehicles], default = vehicles)")
     argparser.add_argument('--test', action = "store_true", help = "flag for Enable defaults parameters run :: \n "+config['Server Address']['server']+" "+config['Server Address']['port']+" -v "+config['Traffic Camera']['yoloVersion']+", -c 5")
     argparser.add_argument('--stream', action = "store_true", help = "stream traffic camera real-Time")
+    argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
     args = argparser.parse_args()
     
     print(args)
