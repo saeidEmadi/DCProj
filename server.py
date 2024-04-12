@@ -48,13 +48,28 @@ class Server(threading.Thread):
             print("socket binded to %s" %(self.__portNumber)) 
             print("socket is listening ....")
             
+          
+    def __closeConnection(self):
+        self.__socket.close()
+        
+        if _debug :
+            print(f"\n**[connection closed]**\n")
+    
+    def __shutDownConnection(self):
+        self.__socket.shutdown()
+        
+        if _debug :
+            print(f"\n**[connection shutdown]**\n")
+    
     def stream(self):
         """ receive video from camera """
         pass
     
     def run(self):
         """ run server """
-        pass
+        self.__startConnection()
+        while True:
+            client, address = self.__socket.accept()
     
     @property
     def serverIP(self):
