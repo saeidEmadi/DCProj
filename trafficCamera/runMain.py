@@ -64,7 +64,6 @@ class Camera(threading.Thread):
             print(f"\n**[connection started]**\n")
     
     def __closeConnection(self):
-        self.__socket.shutdown(1)
         self.__socket.close()
         
         if _debug :
@@ -90,8 +89,7 @@ class Camera(threading.Thread):
         """ run camera and connect to server """
         self.__startConnection()
         print(f"\n<camera NO. {threading.get_ident()} available>\n")
-        time.sleep(60)
-        self.__closeConnection()
+        # self.__closeConnection()
         
         if _debug :
             print(f"\n<< [app start running : Debug mode] >>\n")
