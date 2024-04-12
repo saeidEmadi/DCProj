@@ -2,6 +2,7 @@ import threading
 import configparser
 import argparse
 import ipaddress
+import socket
 from typing import Final
 
 # config parser
@@ -26,13 +27,27 @@ class Server(threading.Thread):
         global _debug
         self.serverIP = serverIP
         self.portNumber = portNumber
+        self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         _debug = DEBUG
         
         if _debug :
             print("\n++[Server object]++\n")
             print(f"[server IP : {self.__serverIP}]")
             print(f"[Port Number : {self.__portNumber}]")
-    
+            
+    def __startConnection(self):
+        """ start connection socket """
+        try:
+            self.__socket.bind((self.__serverIP, self.__portNumber))
+            self.__socket.listen(self.backlogListenVal)
+        except : 
+            raise ConnectionError(f"can't bind server listener, {self.__serverIP}:{self.__portNumber}")
+        
+        if _debug :
+            print(f"\n**[connection started]**\n")
+            print("socket binded to %s" %(self.__portNumber)) 
+            print("socket is listening ....")
+            
     def stream(self):
         """ receive video from camera """
         pass
@@ -76,7 +91,7 @@ if __name__ == "__main__":
     """ this class, you can use this \
         with import and create object \
         or CLI run Server"""
-    print("\n[Server Running : CLI Mode]\n")
+    print("[Server Running : CLI Mode]\n")
     
     # argument parser
     argparser = argparse.ArgumentParser(description = "Server runner Script | run script for receive Camera Packets")
