@@ -3,6 +3,7 @@ import configparser
 import argparse
 import ipaddress
 import socket
+import time
 from typing import Final
 
 # config parser
@@ -28,6 +29,7 @@ class Server(threading.Thread):
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__clientPool = []
         _debug = DEBUG
         
         if _debug :
@@ -39,7 +41,7 @@ class Server(threading.Thread):
         """ start connection socket """
         try:
             self.__socket.bind((self.__serverIP, self.__portNumber))
-            self.__socket.listen(self.backlogListenVal)
+            self.__socket.listen(int(self.backlogListenVal))
         except : 
             raise ConnectionError(f"can't bind server listener, {self.__serverIP}:{self.__portNumber}")
         
@@ -50,12 +52,14 @@ class Server(threading.Thread):
             
           
     def __closeConnection(self):
+        """ socket close connection """
         self.__socket.close()
         
         if _debug :
             print(f"\n**[connection closed]**\n")
     
     def __shutDownConnection(self):
+        """ socket shutdown mode (only receive) """
         self.__socket.shutdown()
         
         if _debug :
@@ -65,12 +69,28 @@ class Server(threading.Thread):
         """ receive video from camera """
         pass
     
+    def __getNewClient(self):
+        """ Threading Function """
+        """ receive and accept new clients """
+        while True :
+            client, address = self.__socket.accept()
+            self.__clientPool.append((client, address))
+            print(client.recv(1024).decode())  
+            print(f"@@ Got connection from ",address)
+
+    
     def run(self):
         """ run server """
         self.__startConnection()
-        while True:
-            client, address = self.__socket.accept()
-    
+        getClients = threading.Thread(target = self.__getNewClient)
+        getClients.start()
+        
+        """
+        getClients.start()
+        getClients.join()
+        self.__shutDownConnection()
+        self.__closeConnection()
+        """
     @property
     def serverIP(self):
         """ return server IP """
@@ -122,5 +142,6 @@ if __name__ == "__main__":
     else :
         if args.debug :
             server = Server(str(args.host[0]),int(args.port[0]),True)
+            server.run()
         else :
             server = Server(str(args.host[0]),int(args.port[0]))
