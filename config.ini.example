@@ -4,3 +4,6 @@ yoloVersion = YOLO_VERSION
 [Server Address]
 server = IP_ADDRESS
 port = PORT_NUMBER
+
+[DEBUG]
+debug mode = BOOLEAN VALUE | True or False
