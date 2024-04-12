@@ -3,7 +3,6 @@ import configparser
 import argparse
 import ipaddress
 import socket
-import time
 from typing import Final
 
 # config parser
@@ -50,7 +49,7 @@ class Server(threading.Thread):
             print("socket binded to %s" %(self.__portNumber)) 
             print("socket is listening ....")
             
-          
+            
     def __closeConnection(self):
         """ socket close connection """
         self.__socket.close()
@@ -65,25 +64,35 @@ class Server(threading.Thread):
         if _debug :
             print(f"\n**[connection shutdown]**\n")
     
-    def stream(self):
+    def stream(self, client):
         """ receive video from camera """
         pass
     
+    def receiveReport(self, client):
+        while True :
+            msg = client.recv(1024).decode()
+            if len(msg) > 0 :
+                print(f"[ Camera :{threading.currentThread().name} {msg}]")
+            else :
+                print(f"[ Camera :{threading.currentThread().name} connection dead]")
+                break
+            
     def __getNewClient(self):
         """ Threading Function """
         """ receive and accept new clients """
         while True :
             client, address = self.__socket.accept()
             self.__clientPool.append((client, address))
-            print(client.recv(1024).decode())  
-            print(f"@@ Got connection from ",address)
-
+            cameraName = client.recv(1024).decode()
+            print(f'//// camera name : {cameraName} ////')
+            print(f"[@@] Got connection from ",address)
+            th = threading.Thread(target = self.receiveReport, args = (client,), name = cameraName)
+            th.start()
     
     def run(self):
         """ run server """
         self.__startConnection()
-        getClients = threading.Thread(target = self.__getNewClient)
-        getClients.start()
+        self.__getNewClient()
         
         """
         getClients.start()
