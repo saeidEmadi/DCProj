@@ -1,8 +1,8 @@
 [Traffic Camera]
 yoloVersion = YOLO_VERSION
 
-[Server Address]
-server = IP_ADDRESS
+[Server]
+server IP = IP_ADDRESS
 port = PORT_NUMBER
 backlogListenVal = IntegerValue #It specifies the number of unaccepted connections that the system will allow before refusing new connections
 
