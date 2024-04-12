@@ -7,3 +7,9 @@ class Server(threading.Thread):
     
     def run(self):
         pass
+    
+if __name__ == "__main__":
+    """ this class, you can use this \
+        with import and create object \
+        or CLI run Server"""
+    print("\n[Server Running : CLI Mode]\n")
