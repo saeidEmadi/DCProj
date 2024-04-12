@@ -12,25 +12,43 @@ class Camera:
     
     def __init__(self, serverIP : str = config['Server Address']['server'], \
         portNumber : int = int(config['Server Address']['port']), \
-        yoloVersion : str = 'yolov9e.pt'):
+        yoloVersion : str = 'yolov9e.pt', DEBUG : bool = False):
         
         """ initial variables """
+        global _debug
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.bondedBox = False
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.yoloVersion = yoloVersion
+        _debug = DEBUG
+        
+        
+        if _debug :
+            print("++[new Camera object]++")
+            print(f"[server IP : {self.__serverIP}]")
+            print(f"[Port Number : {self.__portNumber}]")
+            print(f"[Bonded Box : {self.__bondedBox}]")
+            print(f"[Bonded Box : {self.__yoloVersion}]")
+            
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
         self.serverIP = serverIP
         self.portNumber = portNumber
+        
+        if _debug :
+            print("++[new net Config]++")
+            print(f"[new server IP : {self.__serverIP}]")
+            print(f"[new Port Number : {self.__portNumber}]")
     
     def __startConnection(self):
         """ start connection socket """
         self.__socket.connect((self.__serverIP, self.__portNumber))
         self.__socket.send('camera connected'.encode())
         
+        if _debug :
+            print(f"**[connection started]**")
     
     def reporter(self):
         """ send traffic report the C&C """
@@ -51,7 +69,9 @@ class Camera:
     def run(self):
         """ run camera and connect to server """
         self.__startConnection()
-        pass
+        
+        if _debug :
+            print(f"<< [app start running : Debug mode] >>")
         
     @property
     def yoloVersion(self):
@@ -105,3 +125,8 @@ class Camera:
             raise ValueError('boded box value invalid')
         
         self.__bondedBox = val
+        
+    if __name__ == "__main__":
+        """ this class, you can use this \
+            only with import and create object """
+        raise RuntimeError("this is Class, pls import and create new object")
