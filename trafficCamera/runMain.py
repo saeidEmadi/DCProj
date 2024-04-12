@@ -140,7 +140,7 @@ class Camera(threading.Thread):
         
         self.__bondedBox = val
         
-    if __name__ == "__main__":
-        """ this class, you can use this \
-            only with import and create object """
-        raise RuntimeError("this is Class, pls import and create new object")
+if __name__ == "__main__":
+    """ this class, you can use this \
+        only with import and create object """
+    raise RuntimeError("this is Class, pls import and create new object")
