@@ -62,6 +62,13 @@ class Camera(threading.Thread):
         if _debug :
             print(f"\n**[connection started]**\n")
     
+    def __closeConnection(self):
+        self.__socket.shutdown(1)
+        self.__socket.close()
+        
+        if _debug :
+            print(f"\n**[connection closed]**\n")
+    
     def reporter(self):
         """ send traffic report the C&C """
         pass
