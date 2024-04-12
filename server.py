@@ -33,16 +33,6 @@ class Server(threading.Thread):
             print(f"[server IP : {self.__serverIP}]")
             print(f"[Port Number : {self.__portNumber}]")
     
-    def netConfig(self, serverIP : str, portNumber : int):
-        """ config ip and port """
-        self.serverIP = serverIP
-        self.portNumber = portNumber
-        
-        if _debug :
-            print("\n++[new net Config]++\n")
-            print(f"[new server IP : {self.__serverIP}]")
-            print(f"[new Port Number : {self.__portNumber}]\n")
-    
     def stream(self):
         """ receive video from camera """
         pass
@@ -97,3 +87,10 @@ if __name__ == "__main__":
     argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
     args = argparser.parse_args()
     
+    if args.test : 
+        server = Server(DEBUG = True)
+    else :
+        if args.debug :
+            server = Server(str(args.host[0]),int(args.port[0]),True)
+        else :
+            server = Server(str(args.host[0]),int(args.port[0]))
