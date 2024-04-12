@@ -15,8 +15,8 @@ class Camera(threading.Thread):
     except :
         raise FileExistsError("config.ini file is not exists.")
     
-    def __init__(self, serverIP : str = config['Server Address']['server'], \
-        portNumber : int = int(config['Server Address']['port']), \
+    def __init__(self, serverIP : str = config['Server']['server IP'], \
+        portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e.pt', DEBUG : bool = False):
         
         """ initial Thread initials """
