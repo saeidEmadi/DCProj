@@ -7,8 +7,12 @@ class Camera:
     """ Camera Class : \
         track objects and detect Traffic """
         
+    # read config file and initial config variables
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    try : 
+        config.read('config.ini')
+    except :
+        raise FileExistsError("config.ini file is not exists.")
     
     def __init__(self, serverIP : str = config['Server Address']['server'], \
         portNumber : int = int(config['Server Address']['port']), \
@@ -25,11 +29,11 @@ class Camera:
         
         
         if _debug :
-            print("++[new Camera object]++")
+            print("\n++[new Camera object]++\n")
             print(f"[server IP : {self.__serverIP}]")
             print(f"[Port Number : {self.__portNumber}]")
             print(f"[Bonded Box : {self.__bondedBox}]")
-            print(f"[Bonded Box : {self.__yoloVersion}]")
+            print(f"[Bonded Box : {self.__yoloVersion}]\n")
             
     
     def netConfig(self, serverIP : str, portNumber : int):
@@ -38,17 +42,20 @@ class Camera:
         self.portNumber = portNumber
         
         if _debug :
-            print("++[new net Config]++")
+            print("\n++[new net Config]++\n")
             print(f"[new server IP : {self.__serverIP}]")
-            print(f"[new Port Number : {self.__portNumber}]")
+            print(f"[new Port Number : {self.__portNumber}]\n")
     
     def __startConnection(self):
         """ start connection socket """
-        self.__socket.connect((self.__serverIP, self.__portNumber))
-        self.__socket.send('camera connected'.encode())
+        try:
+            self.__socket.connect((self.__serverIP, self.__portNumber))
+            self.__socket.send('camera connected'.encode())
+        except : 
+            raise ConnectionError(f"can't connect to server, {self.__serverIP}:{self.__portNumber}")
         
         if _debug :
-            print(f"**[connection started]**")
+            print(f"\n**[connection started]**\n")
     
     def reporter(self):
         """ send traffic report the C&C """
@@ -71,7 +78,7 @@ class Camera:
         self.__startConnection()
         
         if _debug :
-            print(f"<< [app start running : Debug mode] >>")
+            print(f"\n<< [app start running : Debug mode] >>\n")
         
     @property
     def yoloVersion(self):
