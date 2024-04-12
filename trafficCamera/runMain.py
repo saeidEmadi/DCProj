@@ -1,9 +1,10 @@
 import ipaddress
 import socket
 import configparser
+import threading
 #from ultralytics import YOLO
 import re
-class Camera:
+class Camera(threading.Thread):
     """ Camera Class : \
         track objects and detect Traffic """
         
@@ -18,7 +19,11 @@ class Camera:
         portNumber : int = int(config['Server Address']['port']), \
         yoloVersion : str = 'yolov9e.pt', DEBUG : bool = False):
         
+        """ initial Thread initials """
+        threading.Thread.__init__(self)
         """ initial variables """
+        
+        # define global _debug for validate Debug mode
         global _debug
         self.serverIP = serverIP
         self.portNumber = portNumber
@@ -26,7 +31,7 @@ class Camera:
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.yoloVersion = yoloVersion
         _debug = DEBUG
-        
+        self
         
         if _debug :
             print("\n++[new Camera object]++\n")
@@ -50,7 +55,7 @@ class Camera:
         """ start connection socket """
         try:
             self.__socket.connect((self.__serverIP, self.__portNumber))
-            self.__socket.send('camera connected'.encode())
+            self.__socket.send(f'camera connected NO. {threading.get_ident()}'.encode())
         except : 
             raise ConnectionError(f"can't connect to server, {self.__serverIP}:{self.__portNumber}")
         
@@ -76,9 +81,11 @@ class Camera:
     def run(self):
         """ run camera and connect to server """
         self.__startConnection()
+        print(f"\n<camera NO. {threading.get_ident()} available>\n")
         
         if _debug :
             print(f"\n<< [app start running : Debug mode] >>\n")
+            print(f"\n<< [ camera NO. {threading.get_ident()} ] >>\n")
         
     @property
     def yoloVersion(self):
