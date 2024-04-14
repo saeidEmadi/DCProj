@@ -2,8 +2,8 @@ import ipaddress
 import socket
 import configparser
 import threading
-import time
-#from ultralytics import YOLO
+import cv2
+from ultralytics import YOLO
 import re
 class Camera(threading.Thread):
     """ Camera Class : \
@@ -18,22 +18,23 @@ class Camera(threading.Thread):
     
     def __init__(self, serverIP : str = config['Server']['server IP'], \
         portNumber : int = int(config['Server']['port']), \
-        yoloVersion : str = 'yolov9e.pt', DEBUG : bool = False):
+        yoloVersion : str = 'yolov9e.pt',show : bool = False, \
+        DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
         """ initial variables """
         
         # define global _debug for validate Debug mode
-        global _debug
+        global _debug, _show
         self.__count = 0
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.bondedBox = False
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.yoloVersion = yoloVersion
-        _debug = DEBUG
-        self
+        _debug, _show = DEBUG , show
+        self.__capture = 0
         
         if _debug :
             print("\n++[new Camera object]++\n")
