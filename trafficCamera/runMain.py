@@ -33,7 +33,8 @@ class Camera(threading.Thread):
     def __init__(self, serverIP : str = config['Server']['server IP'], \
         portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e.pt',show : bool = False, \
-        detectionLabels : list = ['vehicles'] , DEBUG : bool = False):
+        detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
+        DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
@@ -50,6 +51,7 @@ class Camera(threading.Thread):
         _debug, _show = DEBUG , show
         self.__capture = 0
         self.detectionLabels = detectionLabels
+        self.yoloConf = yoloConf
         
         if _debug :
             print("\n++[new Camera object]++\n")
@@ -59,7 +61,8 @@ class Camera(threading.Thread):
             print(f"[Stream Show  : {self._show}]")
             print(f"[yolo Version : {self.__yoloVersion}]")
             print(f"[detection Labels : {self.__detectionLabels}]")
-            print(f"[detection : {self.__detection}]")            
+            print(f"[detection : {self.__detection}]")       
+            print(f"[yolo conf : {self.__yoloConf}]")
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
@@ -101,11 +104,17 @@ class Camera(threading.Thread):
         """ real-Time Camera """
         pass
     
-    def detector(self):
+    def __detector(self):
         # detection index from ClassName
         self.__detection = []
         for _ in range(len(self.__detectionLabels)):
             self.__detection.append(className.index(self.__detectionLabels[_]))
+    
+    def __modelGenerator(self):
+        return YOLO(self.__yoloVersion)
+    
+    def __modelPredictor(self):
+        pass
     
     def run(self):
         """ run camera and connect to server """
@@ -117,6 +126,17 @@ class Camera(threading.Thread):
             print(f"\n<< [app start running : Debug mode] >>\n")
             print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
         
+    @property
+    def yoloConf(self):
+        return self.__yoloConf
+    
+    @yoloConf.setter
+    def yoloConf(self, conf):
+        if 0.01 <= conf <= 0.99 :
+            self.__yoloConf = conf
+        else:
+            raise ValueError('minimum confidence threshold for detections between 0.01 to 0.99')
+    
     @property
     def detectionLabels(self):
         return self.__detectionLabels
@@ -137,7 +157,7 @@ class Camera(threading.Thread):
                     else :
                         print(f" class name : {_} != ms-coco list")
         # convert labels to arg index                
-        self.detector()
+        self.__detector()
 
     @property
     def yoloVersion(self):
