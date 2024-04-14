@@ -16,10 +16,24 @@ class Camera(threading.Thread):
     except :
         raise FileExistsError("config.ini file is not exists.")
     
+    # ms-coco class list
+    global className
+    className = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
+              "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+              "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
+              "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat",
+              "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
+              "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli",
+              "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed",
+              "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone",
+              "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors",
+              "teddy bear", "hair drier", "toothbrush"
+              ]
+    
     def __init__(self, serverIP : str = config['Server']['server IP'], \
         portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e.pt',show : bool = False, \
-        DEBUG : bool = False):
+        detectionLabels : list = ['vehicles'] , DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
@@ -35,14 +49,17 @@ class Camera(threading.Thread):
         self.yoloVersion = yoloVersion
         _debug, _show = DEBUG , show
         self.__capture = 0
+        self.detectionLabels = detectionLabels
         
         if _debug :
             print("\n++[new Camera object]++\n")
             print(f"[server IP : {self.__serverIP}]")
             print(f"[Port Number : {self.__portNumber}]")
             print(f"[Bonded Box : {self.__bondedBox}]")
-            print(f"[Bonded Box : {self.__yoloVersion}]\n")
-            
+            print(f"[Stream Show  : {self._show}]")
+            print(f"[yolo Version : {self.__yoloVersion}]")
+            print(f"[detection Labels : {self.__detectionLabels}]")
+            print(f"[detection : {self.__detection}]")            
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
@@ -84,9 +101,11 @@ class Camera(threading.Thread):
         """ real-Time Camera """
         pass
     
-    def detector(self, detect = 'vehicles'):
-        """ for determine detect all labels or vehicles """
-        pass
+    def detector(self):
+        # detection index from ClassName
+        self.__detection = []
+        for _ in range(len(self.__detectionLabels)):
+            self.__detection.append(className.index(self.__detectionLabels[_]))
     
     def run(self):
         """ run camera and connect to server """
@@ -99,11 +118,33 @@ class Camera(threading.Thread):
             print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
         
     @property
+    def detectionLabels(self):
+        return self.__detectionLabels
+        
+    @detectionLabels.setter
+    def detectionLabels(self, detectionLabels : list):
+        # detection Labels from ClassName
+        self.__detectionLabels = []
+        if 'all' in detectionLabels :
+            self.__detectionLabels = className
+        else :
+            if 'vehicle' in detectionLabels:    
+                self.__detectionLabels = ['bicycle','car','motorbike','aeroplane','bus','train','truck','boat']
+            else :
+                for _ in detectionLabels:
+                    if _ in className:
+                        self.__detectionLabels.append(_)
+                    else :
+                        print(f" class name : {_} != ms-coco list")
+        # convert labels to arg index                
+        self.detector()
+
+    @property
     def yoloVersion(self):
         return self.__yoloVersion
         
     @yoloVersion.setter
-    def yoloVersion(self,ver):
+    def yoloVersion(self, ver):
         if not re.match('^\S{5}\d\S*\.pt$',ver):
             raise ValueError("Yolo Version is not vaild")
         
