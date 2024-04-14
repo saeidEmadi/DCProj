@@ -34,7 +34,7 @@ class Camera(threading.Thread):
         portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e.pt',show : bool = False, \
         detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
-        DEBUG : bool = False):
+        trafficConf : int = 8, DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
@@ -42,7 +42,6 @@ class Camera(threading.Thread):
         
         # define global _debug for validate Debug mode
         global _debug, _show
-        self.__count = 0
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.bondedBox = False
@@ -52,6 +51,7 @@ class Camera(threading.Thread):
         self.__capture = 0
         self.detectionLabels = detectionLabels
         self.yoloConf = yoloConf
+        self.trafficConf = trafficConf
         
         if _debug :
             print("\n++[new Camera object]++\n")
@@ -63,6 +63,7 @@ class Camera(threading.Thread):
             print(f"[detection Labels : {self.__detectionLabels}]")
             print(f"[detection : {self.__detection}]")       
             print(f"[yolo conf : {self.__yoloConf}]")
+            print(f"[traffic conf : {self.__trafficConf}]")
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
@@ -95,25 +96,61 @@ class Camera(threading.Thread):
         """ Threading Function """
         """ send traffic report the C&C """
         self.__socket.send(f'camera NO. {threading.current_thread().ident} | count : {self.__count}'.encode())
-    
-    def videoLoader(self, source):
-        """ determine video source """
-        pass
-    
-    def streamVideo(self):
-        """ real-Time Camera """
-        pass
-    
+        
     def __detector(self):
         # detection index from ClassName
         self.__detection = []
         for _ in range(len(self.__detectionLabels)):
             self.__detection.append(className.index(self.__detectionLabels[_]))
     
-    def __modelGenerator(self):
-        return YOLO(self.__yoloVersion)
-    
     def __modelPredictor(self):
+        model = YOLO(self.__yoloVersion)
+        if _show :
+            while True :
+                cap = cv2.VideoCapture(self.__capture)
+                success, frame = cap.read()
+                
+                if not success:
+                    raise FileNotFoundError('camera is off or video file ended.')
+
+                ## sent video to server
+                
+                results = model(frame, stream=True, show = True, show_labels = True, \
+                    conf = self.__yoloConf, classes = self.__detection)
+                count =  0
+                for r in results:
+                    for box in r.boxes:
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
+                        count += 1
+                        cv2.putText(frame, className[int(box.cls[0])], [x1, y1], cv2.FONT_HERSHEY_SIMPLEX,\
+                            fontScale = 1, color = (255, 0, 0), thickness = 2)
+                self.__checkTraffic(count)
+                cv2.imshow('Camera', frame)
+                if cv2.waitKey(1) == ord('q'):
+                    break
+            cap.release()
+            cv2.destroyAllWindows()
+        else :
+            while True :
+                cap = cv2.VideoCapture(self.__capture)
+                success, frame = cap.read()
+                
+                if not success:
+                    raise FileNotFoundError('camera is off or video file ended.')
+
+                results = model(frame, show = False, conf = self.__yoloConf, classes = self.__detection)
+                count =  0
+                for r in results:
+                    for _ in r.boxes:
+                        count += 1
+                    self.__checkTraffic(count)
+                
+                if cv2.waitKey(1) == ord('q'):
+                    break                        
+    
+    def __checkTraffic(count : int):
         pass
     
     def run(self):
@@ -126,6 +163,17 @@ class Camera(threading.Thread):
             print(f"\n<< [app start running : Debug mode] >>\n")
             print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
         
+    @property
+    def trafficConf(self):
+        return self.__trafficConf
+    
+    @trafficConf.setter
+    def trafficConf(self, trafficConf):
+        if trafficConf > 0 :
+            self.__trafficConf = trafficConf
+        else :
+            raise ValueError('trafficConf must be positive number')
+    
     @property
     def yoloConf(self):
         return self.__yoloConf
