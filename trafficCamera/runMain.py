@@ -92,10 +92,10 @@ class Camera(threading.Thread):
         if _debug :
             print(f"\n**[connection closed]**\n")
     
-    def reporter(self):
+    def reporter(self, msg):
         """ Threading Function """
         """ send traffic report the C&C """
-        self.__socket.send(f'camera NO. {threading.current_thread().ident} | count : {self.__count}'.encode())
+        self.__socket.send(msg.encode())
         
     def __detector(self):
         # detection index from ClassName
@@ -150,8 +150,9 @@ class Camera(threading.Thread):
                 if cv2.waitKey(1) == ord('q'):
                     break                        
     
-    def __checkTraffic(count : int):
-        pass
+    def __checkTraffic(self, count : int):
+        if count > self.__trafficConf :
+            self.reporter(f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +')
     
     def run(self):
         """ run camera and connect to server """
