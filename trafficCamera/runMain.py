@@ -96,7 +96,7 @@ class Camera(threading.Thread):
         """ Threading Function """
         """ send traffic report the C&C """
         self.__socket.send(msg.encode())
-        
+
     def __detector(self):
         # detection index from ClassName
         self.__detection = []
@@ -157,8 +157,9 @@ class Camera(threading.Thread):
     def run(self):
         """ run camera and connect to server """
         self.__startConnection()
-        self.reporter()
-        # self.__closeConnection()
+        predictorThread = threading.Thread(target = self.__modelPredictor, name = "camera model predictor Thread")
+        predictorThread.start()
+        self.__closeConnection()
         
         if _debug :
             print(f"\n<< [app start running : Debug mode] >>\n")
