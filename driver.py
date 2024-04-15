@@ -1,5 +1,7 @@
 import argparse
 import configparser
+from server import Server
+#from trafficCamera.runMain import Camera
 
 if __name__ == "__main__":
     
@@ -11,12 +13,38 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description = "Traffic detection and notify C&C (prototype)")
     argparser.add_argument('host', metavar = 'host', type = str, nargs = 1, help = "Server Address for listening clients")
     argparser.add_argument('port', metavar = 'port', type = int, nargs = 1, help = "port number")
-    argparser.add_argument('-v', '--yolov', metavar = 'yoloVersion', type = str, nargs = 1, help = "Yolo pre-Train Model version (default : "+config['Traffic Camera']['yoloVersion']+")",default = config['Traffic Camera']['yoloVersion'])
+    argparser.add_argument('-v', '--yolov', metavar = 'yoloVersion', type = str, nargs = 1, \
+        help = "Yolo pre-Train Model version (default : "+config['Traffic Camera']['yoloVersion']+")", \
+        default = config['Traffic Camera']['yoloVersion'])
     argparser.add_argument('-BB', '--bb', action = "store_true", help = "Draw A Bounding Box for each object")
-    argparser.add_argument('-d', '--detect', metavar = 'coco class name\'s', default = 'vehicles', nargs = '*', help = "detect all objects in ms-COCO or only vehicles (example : vehicles person [etc.]], default = vehicles)")
-    argparser.add_argument('--test', action = "store_true", help = "flag for Enable defaults parameters run :: \n "+config['Server']['server IP']+" "+config['Server']['port']+" -v "+config['Traffic Camera']['yoloVersion']+", -c 5")
+    argparser.add_argument('-d', '--detect', metavar = 'coco class name\'s', default = 'vehicles', nargs = '*', \
+        help = "detect all objects in ms-COCO or only vehicles (example : vehicles person [etc.]], default = vehicles)")
+    argparser.add_argument('-c', '--client', metavar = 'INT', type = int, default = '5', nargs = 1, \
+        help = "number of clients ,[default = 5]")
+    argparser.add_argument('--test', action = "store_true", \
+        help = "flag for Enable defaults parameters run :: \n "+config['Server']['server IP'] \
+            +" "+config['Server']['port']+" -v "+config['Traffic Camera']['yoloVersion']+", -c 5")
     argparser.add_argument('--stream', action = "store_true", help = "stream traffic camera real-Time")
     argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
     args = argparser.parse_args()
-    
+    # receive params
     print(args)
+
+    """ initialing Server and run it """
+    if args.test :
+        """ server default mode : Config file params """
+        server = Server(DEBUG = True)
+    else :
+        """ server run with args input """
+        server = Server(serverIP = str(args.host[0]), portNumber = int(args.port[0]), DEBUG = args.debug)
+    server.run()
+
+"""
+
+    if args.test :
+        for client in range(args.client):
+            c = Camera(DEBUG = True)
+            c.run()
+    else :
+        c = Camera(show = args.stream,DEBUG = args.debug)
+"""
