@@ -14,8 +14,8 @@ class Tracker:
         # Get center point of new object
         for rect in objectsRect:
             x1, y1, x2, y2 = rect
-            centerX = (x1 + x1 + x2) // 2
-            centerY = (y1 + y1 + y2) // 2
+            centerX = (x1 + x2) // 2
+            centerY = (y1 + y2) // 2
 
             # Find out if that object was detected already
             sameObjectDetected = False
