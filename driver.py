@@ -1,7 +1,7 @@
 import argparse
 import configparser
 from server import Server
-#from trafficCamera.runMain import Camera
+from trafficCamera.runMain import Camera
 
 if __name__ == "__main__":
     
@@ -16,7 +16,6 @@ if __name__ == "__main__":
     argparser.add_argument('-v', '--yolov', metavar = 'yoloVersion', type = str, nargs = 1, \
         help = "Yolo pre-Train Model version (default : "+config['Traffic Camera']['yoloVersion']+")", \
         default = config['Traffic Camera']['yoloVersion'])
-    argparser.add_argument('-BB', '--bb', action = "store_true", help = "Draw A Bounding Box for each object")
     argparser.add_argument('-d', '--detect', metavar = 'coco class name\'s', default = 'vehicles', nargs = '*', \
         help = "detect all objects in ms-COCO or only vehicles (example : vehicles person [etc.]], default = vehicles)")
     argparser.add_argument('-c', '--client', metavar = 'INT', type = int, default = '5', nargs = 1, \
@@ -28,8 +27,8 @@ if __name__ == "__main__":
     argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
     args = argparser.parse_args()
     # receive params
-    print(args)
-
+    # print(args)
+    
     """ initialing Server and run it """
     if args.test :
         """ server default mode : Config file params """
@@ -39,12 +38,15 @@ if __name__ == "__main__":
         server = Server(serverIP = str(args.host[0]), portNumber = int(args.port[0]), DEBUG = args.debug)
     server.run()
 
-"""
-
+    """ initialing Client's and run"""
     if args.test :
+        """ clients default mode : 5 client with Config file params """
         for client in range(args.client):
             c = Camera(DEBUG = True)
             c.run()
     else :
-        c = Camera(show = args.stream,DEBUG = args.debug)
-"""
+        """ clients create with args input """
+        for client in range(args.client):
+            c = Camera(serverIP = str(args.host[0]), portNumber = int(args.port[0]), yoloVersion = str(args.yolov), \
+                detectionLabels = args.detect, show = args.stream, DEBUG = args.debug)
+            c.run()
