@@ -93,7 +93,10 @@ class Camera(threading.Thread):
     def reporter(self, msg):
         """ Threading Function """
         """ send traffic report the C&C """
-        self.__socket.send(msg.encode())
+        reportThread = threading.Thread(target = self.__socket.send, args = msg.encode(), \
+            name = "count reporter Thread")
+        reportThread.start()
+        # self.__socket.send(msg.encode())
 
     def __detector(self):
         # detection index from ClassName
