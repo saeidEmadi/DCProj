@@ -151,6 +151,6 @@ if __name__ == "__main__":
     else :
         if args.debug :
             server = Server(str(args.host[0]),int(args.port[0]),True)
-            server.run()
         else :
             server = Server(str(args.host[0]),int(args.port[0]))
+    server.run()        
