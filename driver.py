@@ -26,9 +26,7 @@ if __name__ == "__main__":
     argparser.add_argument('--stream', action = "store_true", help = "stream traffic camera real-Time")
     argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
     args = argparser.parse_args()
-    # receive params
-    # print(args)
-    
+
     """ initialing Server and run it """
     if args.test :
         """ server default mode : Config file params """
