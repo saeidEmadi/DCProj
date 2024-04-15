@@ -44,7 +44,6 @@ class Camera(threading.Thread):
         global _debug, _show
         self.serverIP = serverIP
         self.portNumber = portNumber
-        self.bondedBox = False
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.yoloVersion = yoloVersion
         _debug, _show = DEBUG , show
@@ -57,7 +56,6 @@ class Camera(threading.Thread):
             print("\n++[new Camera object]++\n")
             print(f"[server IP : {self.__serverIP}]")
             print(f"[Port Number : {self.__portNumber}]")
-            print(f"[Bonded Box : {self.__bondedBox}]")
             print(f"[Stream Show  : {self._show}]")
             print(f"[yolo Version : {self.__yoloVersion}]")
             print(f"[detection Labels : {self.__detectionLabels}]")
@@ -250,18 +248,7 @@ class Camera(threading.Thread):
             raise ValueError("port number invalid")
         
         self.__portNumber = portNumber
-        
-    @property
-    def bondedBox(self):
-        return "Bonded box : " + str(self.__bondedBox)
-    
-    @bondedBox.setter
-    def bondedBox(self,val):
-        if val not in list((True,False)):
-            raise ValueError('boded box value invalid')
-        
-        self.__bondedBox = val
-        
+           
 if __name__ == "__main__":
     """ this class, you can use this \
         only with import and create object """
