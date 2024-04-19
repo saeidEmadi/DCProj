@@ -3,6 +3,8 @@ import socket
 import configparser
 import threading
 import cv2
+import pickle
+import struct
 from ultralytics import YOLO
 import re
 class Camera(threading.Thread):
@@ -34,19 +36,19 @@ class Camera(threading.Thread):
         portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e.pt',show : bool = False, \
         detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
-        trafficConf : int = 8, DEBUG : bool = False):
+        trafficConf : int = 8, stream : bool = False, DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
         """ initial variables """
         
         # define global _debug for validate Debug mode
-        global _debug, _show
+        global _debug, _show, _stream
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.yoloVersion = yoloVersion
-        _debug, _show = DEBUG , show
+        _debug, _show, _stream = DEBUG, show, stream
         self.__capture = 0
         self.detectionLabels = detectionLabels
         self.yoloConf = yoloConf
@@ -98,9 +100,12 @@ class Camera(threading.Thread):
     def reporter(self, msg):
         """ Threading Function """
         """ send traffic report the C&C """
-        reportThread = threading.Thread(target = self.__socket.send, args = msg.encode(), \
-            name = "count reporter Thread")
-        reportThread.start()
+        try : 
+            reportThread = threading.Thread(target = self.__socket.send, args = msg.encode(), \
+                name = "count reporter Thread")
+            reportThread.start()
+        except :
+            print("can't send report to server")
         # self.__socket.send(msg.encode())
 
     def __detector(self):
@@ -119,8 +124,6 @@ class Camera(threading.Thread):
                 
                 if not success:
                     raise FileNotFoundError('camera is off or video file ended.')
-
-                ## sent video to server
                 
                 results = model(frame, stream=True, show = True, show_labels = True, \
                     conf = self.__yoloConf, classes = self.__detection)
@@ -134,6 +137,16 @@ class Camera(threading.Thread):
                         cv2.putText(frame, className[int(box.cls[0])], [x1, y1], cv2.FONT_HERSHEY_SIMPLEX,\
                             fontScale = 1, color = (255, 0, 0), thickness = 2)
                 self.__checkTraffic(count)
+                if _stream : 
+                    piklFrema = pickle.dumps(frame)
+                    msg = struct.pack("Q", len(piklFrema)) + piklFrema
+                    try :
+                        self.__socket.sendall(msg)
+                    except ConnectionResetError :
+                        raise ConnectionError("connection loss")
+                    except :
+                        print("can't sent frame")
+                    
                 cv2.imshow('Camera', frame)
                 if cv2.waitKey(1) == ord('q'):
                     break
@@ -153,9 +166,21 @@ class Camera(threading.Thread):
                     for _ in r.boxes:
                         count += 1
                     self.__checkTraffic(count)
-                
+                if _stream : 
+                    piklFrema = pickle.dumps(frame)
+                    msg = struct.pack("Q", len(piklFrema)) + piklFrema
+                    try :
+                        self.__socket.sendall(msg)
+                    except ConnectionResetError :
+                        raise ConnectionError("connection loss")
+                    except :
+                        print("can't sent frame")
+                    
                 if cv2.waitKey(1) == ord('q'):
-                    break                        
+                    break      
+                
+        print("camera off : this connection will disconnect")                  
+        self.__closeConnection()
     
     def __checkTraffic(self, count : int):
         if count > self.__trafficConf :
