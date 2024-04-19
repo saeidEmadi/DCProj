@@ -39,12 +39,13 @@ if __name__ == "__main__":
     """ initialing Client's and run"""
     if args.test :
         """ clients default mode : 5 client with Config file params """
-        for client in range(args.client):
+        for client , i in zip(range(args.client), range(5)):
             c = Camera(DEBUG = True)
-            c.run()
+            c.streamInput(f'video{i}.mp4')      #set video input
     else :
         """ clients create with args input """
-        for client in range(args.client):
+        for client , i in zip(range(args.client), range(5)):
             c = Camera(serverIP = str(args.host[0]), portNumber = int(args.port[0]), yoloVersion = str(args.yolov), \
                 detectionLabels = args.detect, show = args.stream, DEBUG = args.debug)
-            c.run()
+            c.streamInput(f'video{i}.mp4')      #set video input
+    c.run()
