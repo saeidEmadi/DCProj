@@ -16,9 +16,6 @@ class Camera(threading.Thread):
     except :
         raise FileExistsError("config.ini file is not exists.")
     
-    # CV2 Video Capture Buffer Size
-    cv2BufferSize : int = 100
-    
     # ms-coco class list
     global className
     className = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
@@ -54,6 +51,7 @@ class Camera(threading.Thread):
         self.detectionLabels = detectionLabels
         self.yoloConf = yoloConf
         self.trafficConf = trafficConf
+        self.__cv2BufferSize = 100      # CV2 Video Capture Buffer Size
         
         if _debug :
             print("\n++[new Camera object]++\n")
@@ -113,7 +111,7 @@ class Camera(threading.Thread):
     
     def __modelPredictor(self):
         model = YOLO(self.__yoloVersion)
-        cv2.VideoCapture().set(cv2.CAP_PROP_BUFFERSIZE, cv2BufferSize)
+        cv2.VideoCapture().set(cv2.CAP_PROP_BUFFERSIZE, self.__cv2BufferSize)
         if _show :
             while True :
                 cap = cv2.VideoCapture(self.__capture)
