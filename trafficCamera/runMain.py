@@ -137,7 +137,8 @@ class Camera(threading.Thread):
                         cv2.putText(frame, className[int(box.cls[0])], [x1, y1], cv2.FONT_HERSHEY_SIMPLEX,\
                             fontScale = 1, color = (255, 0, 0), thickness = 2)
                 self.__checkTraffic(count)
-                if _stream : 
+                # video Streaming
+                """ if _stream : 
                     piklFrema = pickle.dumps(frame)
                     msg = struct.pack("Q", len(piklFrema)) + piklFrema
                     try :
@@ -146,7 +147,7 @@ class Camera(threading.Thread):
                         raise ConnectionError("connection loss")
                     except :
                         print("can't sent frame")
-                    
+                """    
                 cv2.imshow('Camera', frame)
                 if cv2.waitKey(1) == ord('q'):
                     break
@@ -166,7 +167,8 @@ class Camera(threading.Thread):
                     for _ in r.boxes:
                         count += 1
                     self.__checkTraffic(count)
-                if _stream : 
+                # video Streaming
+                """if _stream : 
                     piklFrema = pickle.dumps(frame)
                     msg = struct.pack("Q", len(piklFrema)) + piklFrema
                     try :
@@ -175,7 +177,7 @@ class Camera(threading.Thread):
                         raise ConnectionError("connection loss")
                     except :
                         print("can't sent frame")
-                    
+                """
                 if cv2.waitKey(1) == ord('q'):
                     break      
                 
