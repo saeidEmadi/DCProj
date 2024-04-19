@@ -90,6 +90,10 @@ class Camera(threading.Thread):
         if _debug :
             print(f"\n**[connection closed]**\n")
     
+    def streamInput(self, inputCapt):
+        """ this function only capture set """
+        self.__capture = inputCapt
+        
     def reporter(self, msg):
         """ Threading Function """
         """ send traffic report the C&C """
