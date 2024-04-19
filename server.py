@@ -24,7 +24,7 @@ class Server(threading.Thread):
             portNumber : int = int(config['Server']['port']), \
             DEBUG : bool = False):
         """ initial class variables """
-        global _debug
+        global _debug , _stream
         self.serverIP = serverIP
         self.portNumber = portNumber
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,7 +48,6 @@ class Server(threading.Thread):
             print(f"\n**[connection started]**\n")
             print("socket binded to %s" %(self.__portNumber)) 
             print("socket is listening ....")
-            
             
     def __closeConnection(self):
         """ socket close connection """
@@ -82,24 +81,27 @@ class Server(threading.Thread):
         """ receive and accept new clients """
         while True :
             client, address = self.__socket.accept()
-            self.__clientPool.append((client, address))
             cameraName = client.recv(1024).decode()
             print(f'//// camera name : {cameraName} ////')
             print(f"[@@] Got connection from ",address)
-            th = threading.Thread(target = self.receiveReport, args = (client,), name = cameraName)
-            th.start()
+            thReport = threading.Thread(target = self.receiveReport, args = (client,), name = cameraName)
+            self.__clientPool.append((client, address),thReport)
+            thReport.start()
     
     def run(self):
         """ run server """
         self.__startConnection()
         self.__getNewClient()
-        
-        """
-        getClients.start()
-        getClients.join()
-        self.__shutDownConnection()
-        self.__closeConnection()
-        """
+        # check Threads
+        while True :
+            (client, _), thread = self.__clientPool[0]
+            if not thread.is_alive() :
+                print(f"{thread.getName()} is disconnect")
+                self.__clientPool[:] = self.__clientPool[1:]
+                
+        #self.__shutDownConnection()
+        #self.__closeConnection()
+    
     @property
     def serverIP(self):
         """ return server IP """
@@ -142,7 +144,6 @@ if __name__ == "__main__":
     argparser.add_argument('host', metavar = 'host', type = str, nargs = 1, help = "Server Address for listening clients")
     argparser.add_argument('port', metavar = 'port', type = int, nargs = 1, help = "port number")
     argparser.add_argument('--test', action = "store_true", help = "flag for Enable defaults parameters run :: \n "+config['Server']['server IP']+" "+config['Server']['port'])
-    argparser.add_argument('--stream', action = "store_true", help = "stream traffic camera real-Time")
     argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
     args = argparser.parse_args()
     
