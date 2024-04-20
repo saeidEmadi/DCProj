@@ -1,5 +1,6 @@
 [Traffic Camera]
 yoloVersion = YOLO_VERSION
+confidence = YOLO_CONFIDENCE
 
 [Server]
 server IP = IP_ADDRESS
