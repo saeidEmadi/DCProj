@@ -7,14 +7,14 @@ import pickle
 import struct
 from ultralytics import YOLO
 import re
-class Camera(threading.Thread):
+class Camera():
     """ Camera Class : \
         track objects and detect Traffic """
         
     # read config file and initial config variables
     config = configparser.ConfigParser()
     try : 
-        config.read('../config.ini')
+        config.read('config.ini')
     except :
         raise FileExistsError("config.ini file is not exists.")
     
@@ -36,7 +36,7 @@ class Camera(threading.Thread):
         portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e.pt',show : bool = False, \
         detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
-        trafficConf : int = 8, stream : bool = False, DEBUG : bool = False):
+        trafficConf : int = 1, stream : bool = False, DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
@@ -96,16 +96,27 @@ class Camera(threading.Thread):
     def streamInput(self, inputCapt):
         """ this function only capture set """
         self.__capture = inputCapt
+        
+        if _debug :
+            print(f"cv2 Capture set : {self.__capture}")
                 
     def __detector(self):
         # detection index from ClassName
         self.__detection = []
         for _ in range(len(self.__detectionLabels)):
             self.__detection.append(className.index(self.__detectionLabels[_]))
+            
+        if _debug : 
+            print(f"convert class Names : {self.__detectionLabels}")
+            print(f" to ")
+            print(f"{self.__detection}")
     
     def __modelPredictor(self):
         model = YOLO(self.__yoloVersion)
         cv2.VideoCapture().set(cv2.CAP_PROP_BUFFERSIZE, self.__cv2BufferSize)
+        if _debug :
+            print(f"<model Predictor start.>")
+            
         if _show :
             while True :
                 cap = cv2.VideoCapture(str(self.__capture))
@@ -115,7 +126,7 @@ class Camera(threading.Thread):
                     raise FileNotFoundError('camera is off or video file ended.')
                 
                 results = model(frame, stream=True, show_labels = True, \
-                    conf = self.__yoloConf, classes = self.__detection)
+                    conf = self.__yoloConf, classes = self.__detection, verbose = False)
                 count =  0
                 for r in results:
                     for box in r.boxes:
@@ -150,7 +161,7 @@ class Camera(threading.Thread):
                 if not success:
                     raise FileNotFoundError('camera is off or video file ended.')
 
-                results = model(frame, show = False, conf = self.__yoloConf, classes = self.__detection)
+                results = model(frame, show = False, conf = self.__yoloConf, classes = self.__detection, verbose = False)
                 count =  0
                 for r in results:
                     for _ in r.boxes:
@@ -186,6 +197,11 @@ class Camera(threading.Thread):
     """
     
     def __checkTraffic(self, count : int):
+        if _debug :
+            print(f"< Max Count : {self.__trafficConf} >")
+            print(f"< count No. : {count} >")
+            print(f"< thread NO : {threading.current_thread().ident} >")
+            
         if count > self.__trafficConf :
             try :
                 self.__socket.send((f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +').encode())
@@ -195,14 +211,14 @@ class Camera(threading.Thread):
     
     def run(self):
         """ run camera and connect to server """
+        if _debug :
+            print(f"\n<< [app start running : Debug mode] >>\n")
+            print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
+            
         self.__startConnection()
         predictorThread = threading.Thread(target = self.__modelPredictor, name = "camera model predictor Thread")
         predictorThread.start()
         #self.__closeConnection()
-        
-        if _debug :
-            print(f"\n<< [app start running : Debug mode] >>\n")
-            print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
         
     @property
     def trafficConf(self):
