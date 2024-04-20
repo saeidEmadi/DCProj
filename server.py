@@ -13,7 +13,7 @@ try :
 except :
     raise FileExistsError("config.ini file is not exists.")
 
-class Server(threading.Thread):
+class Server():
     """ Server Class use for receive report and data from cameras """        
     # default value for listen socket backLog    
     backlogListenVal : Final[int] = config['Server']["backlogListenVal"]
@@ -43,7 +43,7 @@ class Server(threading.Thread):
             raise ConnectionError(f"can't bind server listener, {self.__serverIP}:{self.__portNumber}")
         
         if _debug :
-            print(f"\n**[connection started]**\n")
+            print(f"\n**[connection started]**")
             print("[socket bound to %s]" %(self.__portNumber)) 
             print("{socket is listening ....}")
             
@@ -66,6 +66,10 @@ class Server(threading.Thread):
     #    pass
 
     def receiveReport(self, client):
+        """ receive counting objects """
+        if _debug : 
+            print(f" ^^  [receiver turn on]  ^^ ")
+        
         while True :
             msg = client.recv(1024).decode()
             if len(msg) > 0 :
@@ -77,6 +81,9 @@ class Server(threading.Thread):
     def __getNewClient(self):
         """ Threading Function """
         """ receive and accept new clients """
+        if _debug :
+            print(f"<client connector enable>")
+        
         while True :
             client, address = self.__socket.accept()
             cameraName = client.recv(1024).decode()
@@ -88,6 +95,9 @@ class Server(threading.Thread):
             
     def run(self):
         """ run server """
+        if _debug :
+            print("[Server app start to run]")
+        
         self.__startConnection()
         getClient = threading.Thread(target = self.__getNewClient())
         getClient.start()
