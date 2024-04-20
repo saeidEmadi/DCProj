@@ -36,7 +36,10 @@ if __name__ == "__main__":
     
     # config parser
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    try : 
+        config.read('config.ini')
+    except :
+        raise FileExistsError("config.ini file is not exists.")
 
     # argument parser
     argparser = argparse.ArgumentParser(description = "Traffic detection and notify C&C (prototype)")
