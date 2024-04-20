@@ -14,7 +14,7 @@ class Camera(threading.Thread):
     # read config file and initial config variables
     config = configparser.ConfigParser()
     try : 
-        config.read('config.ini')
+        config.read('../config.ini')
     except :
         raise FileExistsError("config.ini file is not exists.")
     
@@ -49,17 +49,17 @@ class Camera(threading.Thread):
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.yoloVersion = yoloVersion
         _debug, _show, _stream = DEBUG, show, stream
-        self.__capture = 0
+        # self.__capture = 0
         self.detectionLabels = detectionLabels
         self.yoloConf = yoloConf
         self.trafficConf = trafficConf
         self.__cv2BufferSize = 100      # CV2 Video Capture Buffer Size
-        
+
         if _debug :
             print("\n++[new Camera object]++\n")
             print(f"[server IP : {self.__serverIP}]")
             print(f"[Port Number : {self.__portNumber}]")
-            print(f"[Stream Show  : {self._show}]")
+            # print(f"[Stream Show  : {self._show}]")
             print(f"[yolo Version : {self.__yoloVersion}]")
             print(f"[detection Labels : {self.__detectionLabels}]")
             print(f"[detection : {self.__detection}]")       
@@ -96,18 +96,7 @@ class Camera(threading.Thread):
     def streamInput(self, inputCapt):
         """ this function only capture set """
         self.__capture = inputCapt
-        
-    def reporter(self, msg):
-        """ Threading Function """
-        """ send traffic report the C&C """
-        try : 
-            reportThread = threading.Thread(target = self.__socket.send, args = msg.encode(), \
-                name = "count reporter Thread")
-            reportThread.start()
-        except :
-            print("can't send report to server")
-        # self.__socket.send(msg.encode())
-
+                
     def __detector(self):
         # detection index from ClassName
         self.__detection = []
@@ -119,13 +108,13 @@ class Camera(threading.Thread):
         cv2.VideoCapture().set(cv2.CAP_PROP_BUFFERSIZE, self.__cv2BufferSize)
         if _show :
             while True :
-                cap = cv2.VideoCapture(self.__capture)
+                cap = cv2.VideoCapture(str(self.__capture))
                 success, frame = cap.read()
                 
                 if not success:
                     raise FileNotFoundError('camera is off or video file ended.')
                 
-                results = model(frame, stream=True, show = True, show_labels = True, \
+                results = model(frame, stream=True, show_labels = True, \
                     conf = self.__yoloConf, classes = self.__detection)
                 count =  0
                 for r in results:
@@ -155,7 +144,7 @@ class Camera(threading.Thread):
             cv2.destroyAllWindows()
         else :
             while True :
-                cap = cv2.VideoCapture(self.__capture)
+                cap = cv2.VideoCapture(str(self.__capture))
                 success, frame = cap.read()
                 
                 if not success:
@@ -184,16 +173,31 @@ class Camera(threading.Thread):
         print("camera off : this connection will disconnect")                  
         self.__closeConnection()
     
+    """
+    def reporter(self, msg):
+        
+        try : 
+            reportThread = threading.Thread(target = , args = (msg.encode(),), \
+                name = "count reporter Thread")
+            reportThread.start()
+        except :
+            print("can't send report to server")
+        # self.__socket.send(msg.encode())
+    """
+    
     def __checkTraffic(self, count : int):
         if count > self.__trafficConf :
-            self.reporter(f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +')
+            try :
+                self.__socket.send((f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +').encode())
+            except:
+                print("can't send report to server")
     
     def run(self):
         """ run camera and connect to server """
         self.__startConnection()
         predictorThread = threading.Thread(target = self.__modelPredictor, name = "camera model predictor Thread")
         predictorThread.start()
-        self.__closeConnection()
+        #self.__closeConnection()
         
         if _debug :
             print(f"\n<< [app start running : Debug mode] >>\n")
@@ -232,7 +236,7 @@ class Camera(threading.Thread):
         if 'all' in detectionLabels :
             self.__detectionLabels = className
         else :
-            if 'vehicle' in detectionLabels:    
+            if 'vehicle' or 'vehicles' in detectionLabels:    
                 self.__detectionLabels = ['bicycle','car','motorbike','aeroplane','bus','train','truck','boat']
             else :
                 for _ in detectionLabels:
