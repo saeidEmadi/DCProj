@@ -8,7 +8,6 @@ from typing import Final
 # config parser
 # read config file and initial config variables
 config = configparser.ConfigParser()
-config.read('config.ini')
 try : 
     config.read('config.ini')
 except :
@@ -16,7 +15,6 @@ except :
 
 class Server(threading.Thread):
     """ Server Class use for receive report and data from cameras """        
-    
     # default value for listen socket backLog    
     backlogListenVal : Final[int] = config['Server']["backlogListenVal"]
     
@@ -46,8 +44,8 @@ class Server(threading.Thread):
         
         if _debug :
             print(f"\n**[connection started]**\n")
-            print("socket binded to %s" %(self.__portNumber)) 
-            print("socket is listening ....")
+            print("[socket bound to %s]" %(self.__portNumber)) 
+            print("{socket is listening ....}")
             
     def __closeConnection(self):
         """ socket close connection """
@@ -63,17 +61,17 @@ class Server(threading.Thread):
         if _debug :
             print(f"\n**[connection shutdown]**\n")
     
-    def stream(self, client):
+    # def stream(self, client):
         """ receive video from camera """
-        pass
-    
+    #    pass
+
     def receiveReport(self, client):
         while True :
             msg = client.recv(1024).decode()
             if len(msg) > 0 :
-                print(f"[ Camera :{threading.currentThread().name} {msg}]")
+                print(f"[ <Camera> | {threading.currentThread().name} {msg}]")
             else :
-                print(f"[ Camera :{threading.currentThread().name} connection dead]")
+                print(f"[ <Camera> | {threading.currentThread().name} connection dead]")
                 break
             
     def __getNewClient(self):
@@ -82,21 +80,22 @@ class Server(threading.Thread):
         while True :
             client, address = self.__socket.accept()
             cameraName = client.recv(1024).decode()
-            print(f'//// camera name : {cameraName} ////')
-            print(f"[@@] Got connection from ",address)
+            print(f'<camera name : {cameraName} join to Server>')
+            print(f"[Got connection from {address}]")
             thReport = threading.Thread(target = self.receiveReport, args = (client,), name = cameraName)
-            self.__clientPool.append((client, address),thReport)
+            self.__clientPool.append(((client, address),thReport))
             thReport.start()
-    
+            
     def run(self):
         """ run server """
         self.__startConnection()
-        self.__getNewClient()
+        getClient = threading.Thread(target = self.__getNewClient())
+        getClient.start()
         # check Threads
         while True :
             (client, _), thread = self.__clientPool[0]
             if not thread.is_alive() :
-                print(f"{thread.getName()} is disconnect")
+                print(f">> {thread.getName()} is disconnect <<")
                 self.__clientPool[:] = self.__clientPool[1:]
                 
         #self.__shutDownConnection()
@@ -154,4 +153,4 @@ if __name__ == "__main__":
             server = Server(str(args.host[0]),int(args.port[0]),True)
         else :
             server = Server(str(args.host[0]),int(args.port[0]))
-    server.run()        
+    server.run()
