@@ -191,6 +191,7 @@ class Camera(threading.Thread):
                 self.__socket.send((f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +').encode())
             except:
                 print("can't send report to server")
+                self.__startConnection()
     
     def run(self):
         """ run camera and connect to server """
