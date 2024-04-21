@@ -22,7 +22,7 @@ def __clientSide(args):
         """ clients default mode : 5 client with Config file params """
         videos = videoController.getCameraOfflineVideos(5)
         for i in range(5):
-            c = Camera(DEBUG = True)
+            c = Camera(DEBUG = True, device = str(args.device[0]))
             c.streamInput(".\\videos\\"+videos[i])      #set video input
             th = threading.Thread(target = c.run)
             th.start()
@@ -32,7 +32,7 @@ def __clientSide(args):
         for i in range(args.client[0]):
             c = Camera(serverIP = str(args.host[0]), portNumber = int(args.port[0]), \
                 yoloVersion = args.yolov[0], yoloConf = args.yoloConf[0], trafficConf = args.trafficConf[0], \
-                detectionLabels = args.detect, show = args.stream, DEBUG = args.debug)
+                detectionLabels = args.detect, show = args.stream, DEBUG = args.debug, device = str(args.device[0]))
             c.streamInput(".\\videos\\"+videos[i])      #set video input
             th = threading.Thread(target = c.run)
             th.start()
@@ -67,6 +67,8 @@ if __name__ == "__main__":
             +" "+config['Server']['port']+" -v "+config['Traffic Camera']['yoloVersion']+", -c 5")
     argparser.add_argument('--stream', action = "store_true", help = "stream traffic camera real-Time")
     argparser.add_argument('--debug', action = "store_true", help = "flag for Enable Debug mode [show CLI logs]")
+    argparser.add_argument('--device',metavar = "core" , nargs = 1, type = str, required = True, \
+        help = "yolo gpu core  or CPU [ex. cpu , cuda:0]")
     args = argparser.parse_args()
 
     serverThread = threading.Thread(target = __serverSide, args = (args,))
