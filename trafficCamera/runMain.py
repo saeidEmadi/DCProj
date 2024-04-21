@@ -57,14 +57,14 @@ class Camera():
 
         if _debug :
             print("\n++[new Camera object]++\n")
-            print(f"[server IP : {self.__serverIP}]")
-            print(f"[Port Number : {self.__portNumber}]")
-            # print(f"[Stream Show  : {self._show}]")
-            print(f"[yolo Version : {self.__yoloVersion}]")
-            print(f"[detection Labels : {self.__detectionLabels}]")
-            print(f"[detection : {self.__detection}]")       
-            print(f"[yolo conf : {self.__yoloConf}]")
-            print(f"[traffic conf : {self.__trafficConf}]")
+            print(f" Camera : [server IP : {self.__serverIP}]")
+            print(f"[ Camera Port Number : {self.__portNumber}]")
+            # print(f" Camera : [Stream Show  : {self._show}]")
+            print(f" Camera : [yolo Version : {self.__yoloVersion}]")
+            print(f" Camera : [detection Labels : {self.__detectionLabels}]")
+            print(f" Camera : [detection : {self.__detection}]")       
+            print(f" Camera : [yolo conf : {self.__yoloConf}]")
+            print(f" Camera : [traffic conf : {self.__trafficConf}]")
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
@@ -72,9 +72,9 @@ class Camera():
         self.portNumber = portNumber
         
         if _debug :
-            print("\n++[new net Config]++\n")
-            print(f"[new server IP : {self.__serverIP}]")
-            print(f"[new Port Number : {self.__portNumber}]\n")
+            print(" Camera : \n++[new net Config]++\n")
+            print(f" Camera : [new server IP : {self.__serverIP}]")
+            print(f" Camera : [new Port Number : {self.__portNumber}]\n")
     
     def __startConnection(self):
         """ start connection socket """
@@ -85,20 +85,20 @@ class Camera():
             raise ConnectionError(f"can't connect to server, {self.__serverIP}:{self.__portNumber}")
         
         if _debug :
-            print(f"\n**[connection started]**\n")
+            print(f"\n Camera : **[connection started]**\n")
     
     def __closeConnection(self):
         self.__socket.close()
         
         if _debug :
-            print(f"\n**[connection closed]**\n")
+            print(f"\n** Camera : [connection closed]**\n")
     
     def streamInput(self, inputCapt):
         """ this function only capture set """
         self.__capture = inputCapt
         
         if _debug :
-            print(f"cv2 Capture set : {self.__capture}")
+            print(f" Camera : cv2 Capture set : {self.__capture}")
                 
     def __detector(self):
         # detection index from ClassName
@@ -107,15 +107,15 @@ class Camera():
             self.__detection.append(className.index(self.__detectionLabels[_]))
             
         if _debug : 
-            print(f"convert class Names : {self.__detectionLabels}")
-            print(f" to ")
-            print(f"{self.__detection}")
+            print(f" Camera : convert class Names : {self.__detectionLabels}")
+            print(f" Camera : to ")
+            print(f" Camera : {self.__detection}")
     
     def __modelPredictor(self):
         model = YOLO(self.__yoloVersion)
         cv2.VideoCapture().set(cv2.CAP_PROP_BUFFERSIZE, self.__cv2BufferSize)
         if _debug :
-            print(f"<model Predictor start.>")
+            print(f" Camera : <model Predictor start.>")
             
         if _show :
             while True :
@@ -146,7 +146,7 @@ class Camera():
                     except ConnectionResetError :
                         raise ConnectionError("connection loss")
                     except :
-                        print("can't sent frame")
+                        print(" Camera : can't sent frame")
                 """    
                 cv2.imshow('Camera', frame)
                 if cv2.waitKey(1) == ord('q'):
@@ -176,12 +176,12 @@ class Camera():
                     except ConnectionResetError :
                         raise ConnectionError("connection loss")
                     except :
-                        print("can't sent frame")
+                        print(" Camera : can't sent frame")
                 """
                 if cv2.waitKey(1) == ord('q'):
                     break      
                 
-        print("camera off : this connection will disconnect")                  
+        print(" Camera : camera off : this connection will disconnect")                  
         self.__closeConnection()
     
     """
@@ -192,28 +192,28 @@ class Camera():
                 name = "count reporter Thread")
             reportThread.start()
         except :
-            print("can't send report to server")
+            print(" Camera : can't send report to server")
         # self.__socket.send(msg.encode())
     """
     
     def __checkTraffic(self, count : int):
         if _debug :
-            print(f"< Max Count : {self.__trafficConf} >")
-            print(f"< count No. : {count} >")
-            print(f"< thread NO : {threading.current_thread().ident} >")
+            print(f" Camera : < Max Count : {self.__trafficConf} >")
+            print(f" Camera : < count No. : {count} >")
+            print(f" Camera : < thread NO : {threading.current_thread().ident} >")
             
         if count > self.__trafficConf :
             try :
                 self.__socket.send((f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +').encode())
             except:
-                print("can't send report to server")
+                print(" Camera : can't send report to server")
                 self.__startConnection()
     
     def run(self):
         """ run camera and connect to server """
         if _debug :
-            print(f"\n<< [app start running : Debug mode] >>\n")
-            print(f"\n<< [ camera NO. {threading.current_thread().ident} ] >>\n")
+            print(f"\n Camera : << [app start running : Debug mode] >>\n")
+            print(f"\n Camera : << [ camera NO. {threading.current_thread().ident} ] >>\n")
             
         self.__startConnection()
         predictorThread = threading.Thread(target = self.__modelPredictor, name = "camera model predictor Thread")
@@ -260,7 +260,7 @@ class Camera():
                     if _ in className:
                         self.__detectionLabels.append(_)
                     else :
-                        print(f" class name : {_} != ms-coco list")
+                        print(f" Camera :  class name : {_} != ms-coco list")
         # convert labels to arg index                
         self.__detector()
 
