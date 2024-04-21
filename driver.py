@@ -24,9 +24,9 @@ def __clientSide(args):
             th.start()
     else :
         """ clients create with args input """
-        for i in range(args.client):
+        for i in range(args.client[0]):
             c = Camera(serverIP = str(args.host[0]), portNumber = int(args.port[0]), \
-                yoloVersion = str(args.yolov), yoloConf = args.yoloConf, trafficConf = args.trafficConf, \
+                yoloVersion = args.yolov[0], yoloConf = args.yoloConf[0], trafficConf = args.trafficConf[0], \
                 detectionLabels = args.detect, show = args.stream, DEBUG = args.debug)
             c.streamInput(f'video{i}.mp4')      #set video input
             th = threading.Thread(target = c.run)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     argparser.add_argument('port', metavar = 'port', type = int, nargs = 1, help = "port number")
     argparser.add_argument('-v', '--yolov', metavar = 'yoloVersion', type = str, nargs = 1, \
         help = "Yolo pre-Train Model version (default : "+config['Traffic Camera']['yoloVersion']+")", \
-        default = config['Traffic Camera']['yoloVersion'])
+        default = [config['Traffic Camera']['yoloVersion'],])
     argparser.add_argument('-yc', '--yoloConf', metavar = 'yoloConf', type = float, nargs = 1, \
         help = "Yolo pre-Train Model confidence (default : "+config['Traffic Camera']['confidence']+")", \
         default = config['Traffic Camera']['confidence'])
