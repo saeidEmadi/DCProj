@@ -3,6 +3,7 @@ import configparser
 from server import Server
 from trafficCamera.runMain import Camera
 import threading
+from videoController import VideoController
     
 def __serverSide(args) :
     if args.test :
@@ -14,21 +15,25 @@ def __serverSide(args) :
     server.run()
     
 def __clientSide(args):
+    videoController = VideoController('.','.')
+    videoController.videoAdder()
     """ initialing Client's and run"""
     if args.test :
         """ clients default mode : 5 client with Config file params """
+        videos = videoController.getCameraOfflineVideos(5)
         for i in range(5):
             c = Camera(DEBUG = True)
-            c.streamInput(f'video{i}.mp4')      #set video input
+            c.streamInput(".\\videos\\"+videos[i])      #set video input
             th = threading.Thread(target = c.run)
             th.start()
     else :
         """ clients create with args input """
+        videos = videoController.getCameraOfflineVideos(args.client[0])
         for i in range(args.client[0]):
             c = Camera(serverIP = str(args.host[0]), portNumber = int(args.port[0]), \
                 yoloVersion = args.yolov[0], yoloConf = args.yoloConf[0], trafficConf = args.trafficConf[0], \
                 detectionLabels = args.detect, show = args.stream, DEBUG = args.debug)
-            c.streamInput(f'video{i}.mp4')      #set video input
+            c.streamInput(".\\videos\\"+videos[i])      #set video input
             th = threading.Thread(target = c.run)
             th.start()
 
