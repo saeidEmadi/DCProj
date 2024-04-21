@@ -6,13 +6,14 @@ class VideoController():
         if videos folder is exists : 
             True : change video names and move in to
             else : make video directory """
-    def __init__(self, source : str, dest : str = '.', formats : list = ['mp4','mkv']):
+    def __init__(self, source : str, dest : str = '.', formats : list = ['.mp4','.mkv']):
         """ initial class constructor """
         # check video path folder
         self.source = source
         self.dest = dest
         self.formats = formats
-        self.__videos = []
+        self.__videos = self.__fetchVideos(source)
+        self.__lastIndex = self.__getLastIndex()
         
         try : 
             if 'videos' not in os.listdir(dest):
@@ -35,6 +36,16 @@ class VideoController():
                     or add path """
         pass
     
+    def __getLastIndex(self) -> int :
+        """ find last index for set new name indexing """
+        
+        videos = self.__fetchVideos(self.__dest+"\\videos")
+        if len(videos) > 0 :
+            file_name, _ = os.path.splitext(videos[-1])
+            return int(''.join(_ for _ in file_name if _.isdigit()))
+        
+        return 0
+        
     def __nameChanger(self, nameStr) -> str :
         """ change video name """
         pass
@@ -44,13 +55,18 @@ class VideoController():
         
         pass
     
-    def __fetchVideos(self, addr : str) -> None :
+    def __fetchVideos(self, addr : str) -> list :
         """ fetch vide files and directory """
+        if os.path.isfile(addr) :
+            addr = os.path.realpath(addr)
+            
         direList = os.listdir(addr)
+        videos = list()
         for _ in direList :
             file_name, extension = os.path.splitext(_)
             if extension in self.__formats :
-                self.__videos.append(_)
+                videos.append(_)
+        return videos
     
     @property
     def source(self) -> str :
@@ -59,7 +75,8 @@ class VideoController():
     @source.setter
     def source(self, sourceAddress) -> None :
         """ check source address valid """
-        if self.__pathIsFileOrDir(sourceAddress) :
+        if os.path.isdir(sourceAddress) \
+            or os.path.isfile(sourceAddress) :
             self.__source = sourceAddress
         else : 
             raise FileExistsError('source Path is not exists.')
@@ -71,10 +88,10 @@ class VideoController():
     @dest.setter
     def dest(self, destAddress) -> None :
         """ check destination address valid """
-        if self.__pathIsFileOrDir(destAddress) :
+        if os.path.isdir(destAddress) :
             self.__dest = destAddress
         else : 
-            raise FileExistsError('destination Path is not exists.') 
+            raise FileExistsError('source Path is not exists.')
     
     @property
     def formats(self) -> list :
@@ -83,14 +100,6 @@ class VideoController():
     @formats.setter
     def formats(self, formats) -> None :
         self.__formats = formats
-    
-    def __pathIsFileOrDir(self, address) -> bool :
-        """ check Address Path """
-        if os.path.isdir(address) :   # directory address check
-            return True
-        elif os.path.isfile(address) :  # file address check
-            return True
-        return False
     
 if __name__ == "__main__" :
     
