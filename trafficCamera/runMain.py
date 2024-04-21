@@ -34,7 +34,7 @@ class Camera():
     
     def __init__(self, serverIP : str = config['Server']['server IP'], \
         portNumber : int = int(config['Server']['port']), \
-        yoloVersion : str = 'yolov9e',show : bool = False, \
+        yoloVersion : str = 'yolov9e',show : bool = False, device : str = 'cpu', \
         detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
         trafficConf : int = 1, stream : bool = False, DEBUG : bool = False):
         
@@ -53,6 +53,7 @@ class Camera():
         self.detectionLabels = detectionLabels
         self.yoloConf = yoloConf
         self.trafficConf = trafficConf
+        self.device = device
         self.__cv2BufferSize = 100      # CV2 Video Capture Buffer Size
 
         if _debug :
@@ -125,7 +126,7 @@ class Camera():
                 if not success:
                     raise FileNotFoundError('camera is off or video file ended.')
                 
-                results = model(frame, stream=True, show_labels = True, \
+                results = model(frame, stream=True, show_labels = True, device = self.__device, \
                     conf = self.__yoloConf, classes = self.__detection, verbose = False)
                 count =  0
                 for r in results:
@@ -161,7 +162,8 @@ class Camera():
                 if not success:
                     raise FileNotFoundError('camera is off or video file ended.')
 
-                results = model(frame, show = False, conf = self.__yoloConf, classes = self.__detection, verbose = False)
+                results = model(frame, show = False, conf = self.__yoloConf, classes = self.__detection, \
+                    verbose = False, device = self.__device)
                 count =  0
                 for r in results:
                     for _ in r.boxes:
@@ -305,6 +307,20 @@ class Camera():
         
         self.__portNumber = portNumber
            
+    @property 
+    def device(self) :
+        return self.__device
+
+    @device.setter
+    def device(self, deviceName) :
+        """ select yolo model code devices 
+            0 : => CPU
+            cuda:n => n core in GPU """
+        if deviceName in ['0','1','2','3','cuda:0','cuda:1','cuda:2','cuda:3','cpu'] :
+            self.__device = deviceName
+        else :
+            raise ProcessLookupError("yolo model core invalid [0 for cpu and cuda:0 for GPU]")        
+
 if __name__ == "__main__":
     """ this class, you can use this \
         only with import and create object """
