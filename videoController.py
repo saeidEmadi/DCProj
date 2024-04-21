@@ -46,9 +46,11 @@ class VideoController():
         
         return 0
         
-    def __nameChanger(self, nameStr) -> str :
-        """ change video name """
-        pass
+    def __getNemName(self, videoFormat) -> str :
+        """ create new video name
+            pattern : video{index}[.format]"""
+        self.__lastIndex += 1
+        return f"video{self.__lastIndex - 1}{videoFormat}"
     
     def checkPairVideoAndClient(self, numOfClients : int) -> list :
         """ check pair camera's and Client's """
