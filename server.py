@@ -149,7 +149,9 @@ if __name__ == "__main__":
     print("[Server Running : CLI Mode]\n")
     
     # argument parser
-    argparser = argparse.ArgumentParser(description = "Server runner Script | run script for receive Camera Packets")
+    argparser = argparse.ArgumentParser(
+        description = "Server runner Script | run script for receive Camera Packets",\
+            prog = 'Server')
     argparser.add_argument('host', metavar = 'host', type = str, nargs = 1, help = "Server Address for listening clients")
     argparser.add_argument('port', metavar = 'port', type = int, nargs = 1, help = "port number")
     argparser.add_argument('--test', action = "store_true", help = "flag for Enable defaults parameters run :: \n "+config['Server']['server IP']+" "+config['Server']['port'])
