@@ -12,6 +12,7 @@ class VideoController():
         self.source = source
         self.dest = dest
         self.formats = formats
+        self.__videos = []
         
         try : 
             if 'videos' not in os.listdir(dest):
@@ -22,7 +23,10 @@ class VideoController():
     
     def videoAdder(self) -> bool :
         """ add video from source to driver Path """
-        pass
+        if os.path.isdir(self.__source) :
+            pass
+        elif os.path.isfile(self.__source) :
+            pass
     
     def __driverChecker(self) -> bool :
         """ check driver.py for running | 
@@ -35,9 +39,18 @@ class VideoController():
         """ change video name """
         pass
     
-    def checkPairVideoAndClient(self) -> list :
+    def checkPairVideoAndClient(self, numOfClients : int) -> list :
         """ check pair camera's and Client's """
+        
         pass
+    
+    def __fetchVideos(self, addr : str) -> None :
+        """ fetch vide files and directory """
+        direList = os.listdir(addr)
+        for _ in direList :
+            file_name, extension = os.path.splitext(_)
+            if extension in self.__formats :
+                self.__videos.append(_)
     
     @property
     def source(self) -> str :
