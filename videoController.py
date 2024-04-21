@@ -12,9 +12,8 @@ class VideoController():
         self.source = source
         self.dest = dest
         self.formats = formats
-        self.__videos = self.__fetchVideos(source)
         self.__lastIndex = self.__getLastIndex()
-        
+
         try : 
             if 'videos' not in os.listdir(dest):
                 #os.mkdir(os.path.dirname(__file__)+"\\videos")
@@ -22,13 +21,31 @@ class VideoController():
         except :
             raise FileNotFoundError('The directory name is invalid')
     
-    def videoAdder(self) -> bool :
-        """ add video from source to driver Path """
-        if os.path.isdir(self.__source) :
-            pass
-        elif os.path.isfile(self.__source) :
-            pass
+    def __fileMover(self, source : str, dest : str) -> bool :
+        try :
+            os.replace(source, dest)
+            return True
+        except : 
+            return False
     
+    def videoAdder(self) -> None :
+        """ add video from source to destination Path """
+        if os.path.isfile(self.__source) :
+            file_name, extension = os.path.splitext(self.__source)
+            if self.__fileMover(os.path.realpath(self.__source), \
+                self.__dest+"\\videos\\"+self.__getNemName(extension)) :
+                print(f"mv {os.path.realpath(self.__source)} to {self.__dest}\\videos\\")
+            else :
+                print(f"can\'t mov {os.path.realpath(self.__source)} to {self.__dest}\\videos\\")
+        elif os.path.isdir(self.__source) :
+            for video in self.__fetchVideos(self.source) :
+                file_name, extension = os.path.splitext(os.path.realpath(video))
+                if self.__fileMover(os.path.realpath(video), \
+                    self.__dest+"\\videos\\"+self.__getNemName(extension)) :
+                    print(f"mv {os.path.realpath(video)} to {self.__dest}\\videos\\")
+                else :
+                    print(f"can\'t mov {os.path.realpath(video)} to {self.__dest}\\videos\\********")
+                    
     def __driverChecker(self) -> bool :
         """ check driver.py for running | 
             True : run app and add video, etc
@@ -44,13 +61,13 @@ class VideoController():
             file_name, _ = os.path.splitext(videos[-1])
             return int(''.join(_ for _ in file_name if _.isdigit()))
         
-        return 0
+        return -1
         
     def __getNemName(self, videoFormat) -> str :
         """ create new video name
             pattern : video{index}[.format]"""
         self.__lastIndex += 1
-        return f"video{self.__lastIndex - 1}{videoFormat}"
+        return f"video{self.__lastIndex}{videoFormat}"
     
     def checkPairVideoAndClient(self, numOfClients : int) -> list :
         """ check pair camera's and Client's """
@@ -60,7 +77,7 @@ class VideoController():
     def __fetchVideos(self, addr : str) -> list :
         """ fetch vide files and directory """
         if os.path.isfile(addr) :
-            addr = os.path.realpath(addr)
+           addr = os.path.dirname(os.path.realpath(addr))
             
         direList = os.listdir(addr)
         videos = list()
@@ -68,6 +85,7 @@ class VideoController():
             file_name, extension = os.path.splitext(_)
             if extension in self.__formats :
                 videos.append(_)
+                
         return videos
     
     @property
@@ -124,3 +142,4 @@ if __name__ == "__main__" :
     print(args)
     
     c = VideoController(source = args.source_address[0], dest = args.dest[0])
+    c.videoAdder()
