@@ -31,8 +31,8 @@ class Server():
         
         if _debug :
             print("\n++[Server object]++\n")
-            print(f"[server IP : {self.__serverIP}]")
-            print(f"[Port Number : {self.__portNumber}]")
+            print(f"[Server IP : {self.__serverIP}]")
+            print(f"[Server Port Number : {self.__portNumber}]")
             
     def __startConnection(self):
         """ start connection socket """
@@ -43,23 +43,23 @@ class Server():
             raise ConnectionError(f"can't bind server listener, {self.__serverIP}:{self.__portNumber}")
         
         if _debug :
-            print(f"\n**[connection started]**")
-            print("[socket bound to %s]" %(self.__portNumber)) 
-            print("{socket is listening ....}")
+            print(f"\n**[Server connection started]**")
+            print("[Server socket bound to %s]" %(self.__portNumber)) 
+            print("{Server socket is listening ....}")
             
     def __closeConnection(self):
         """ socket close connection """
         self.__socket.close()
         
         if _debug :
-            print(f"\n**[connection closed]**\n")
+            print(f"\n**[Server connection closed]**\n")
     
     def __shutDownConnection(self):
         """ socket shutdown mode (only receive) """
         self.__socket.shutdown()
         
         if _debug :
-            print(f"\n**[connection shutdown]**\n")
+            print(f"\n**[Server connection shutdown]**\n")
     
     # def stream(self, client):
         """ receive video from camera """
@@ -68,27 +68,27 @@ class Server():
     def receiveReport(self, client):
         """ receive counting objects """
         if _debug : 
-            print(f" ^^  [receiver turn on]  ^^ ")
+            print(f"Server :  ^^  [receiver turn on]  ^^ ")
         
         while True :
             msg = client.recv(1024).decode()
             if len(msg) > 0 :
-                print(f"[ <Camera> | {threading.currentThread().name} {msg}]")
+                print(f" Server : [ <Camera> | {threading.currentThread().name} {msg}]")
             else :
-                print(f"[ <Camera> | {threading.currentThread().name} connection dead]")
+                print(f" Server : [ <Camera> | {threading.currentThread().name} connection dead]")
                 break
             
     def __getNewClient(self):
         """ Threading Function """
         """ receive and accept new clients """
         if _debug :
-            print(f"<client connector enable>")
+            print(f" Server : <client connector enable>")
         
         while True :
             client, address = self.__socket.accept()
             cameraName = client.recv(1024).decode()
-            print(f'<camera name : {cameraName} join to Server>')
-            print(f"[Got connection from {address}]")
+            print(f' Server : <camera name : {cameraName} join to Server>')
+            print(f" Server : [Got connection from {address}]")
             thReport = threading.Thread(target = self.receiveReport, args = (client,), name = cameraName)
             self.__clientPool.append(((client, address),thReport))
             thReport.start()
@@ -105,7 +105,7 @@ class Server():
         while True :
             (client, _), thread = self.__clientPool[0]
             if not thread.is_alive() :
-                print(f">> {thread.getName()} is disconnect <<")
+                print(f" Server : >> {thread.getName()} is disconnect <<")
                 self.__clientPool[:] = self.__clientPool[1:]
                 
         #self.__shutDownConnection()
