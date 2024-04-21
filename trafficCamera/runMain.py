@@ -34,7 +34,7 @@ class Camera():
     
     def __init__(self, serverIP : str = config['Server']['server IP'], \
         portNumber : int = int(config['Server']['port']), \
-        yoloVersion : str = 'yolov9e.pt',show : bool = False, \
+        yoloVersion : str = 'yolov9e',show : bool = False, \
         detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
         trafficConf : int = 1, stream : bool = False, DEBUG : bool = False):
         
@@ -270,11 +270,10 @@ class Camera():
         
     @yoloVersion.setter
     def yoloVersion(self, ver):
-        if not re.match('^\S{5}\d\S*\.pt$',ver):
+        if not re.match('^\S{5}\d\S*$',ver):
             raise ValueError("Yolo Version is not vaild")
-        
-        self.__yoloVersion = ver
-        
+        self.__yoloVersion = ver+".pt"
+
     @property
     def serverIP(self):
         """ return server IP """
