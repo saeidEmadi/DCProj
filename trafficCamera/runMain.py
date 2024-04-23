@@ -36,7 +36,7 @@ class Camera():
         portNumber : int = int(config['Server']['port']), \
         yoloVersion : str = 'yolov9e',show : bool = False, device : str = 'cpu', \
         detectionLabels : list = ['vehicles'], yoloConf : float = 0.6, \
-        trafficConf : int = 1, stream : bool = False, DEBUG : bool = False):
+        trafficConf : int = 8, stream : bool = False, DEBUG : bool = False):
         
         """ initial Thread initials """
         threading.Thread.__init__(self)
