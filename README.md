@@ -24,7 +24,7 @@ and the network has been defined locally
  $ python -m venv .venv
 ```
 - [ ] [clone Project](https://github.com/saeidEmadi/DCProj.git)
-- [ ] make [config.ini](#config.ini) file
+- [ ] make [config.ini](#configini) file
 - [ ] install `pip` requirements
 - [ ]  add videos in directory
 ```sh
