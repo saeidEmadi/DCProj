@@ -270,10 +270,17 @@ class Camera():
         
     @yoloVersion.setter
     def yoloVersion(self, ver):
-        if not re.match('^\S{5}\d\S*$',ver):
-            raise ValueError("Yolo Version is not vaild")
-        self.__yoloVersion = ver+".pt"
-
+        """detect yolo version for ultralytics"""
+        version = list["YOLOv3","YOLOv3-Ultralytics","YOLOv3u","yolov5nu","yolov5su","yolov5mu","yolov5lu","yolov5xu","yolov5n6u","yolov5s6u"
+                       ,"yolov5m6u","yolov5l6u","yolov5x6u","yolov6-n","yolov6-s","yolov6-m","yolov6-l","yolov6-l6","yolov7","yolov7x","yolov7-w6"
+                       ,"yolov7-e6","yolov7-d6","yolov7-e6e","yolov8n", "yolov8s", "yolov8m" ,"yolov8l", "yolov8x","yolov8n-seg", "yolov8s-seg"
+                       ,"yolov8m-seg", "yolov8l-seg", "yolov8x-seg","yolov8n-pose", "yolov8s-pose", "yolov8m-pose", "yolov8l-pose", "yolov8x-pose"
+                       ,"yolov8x-pose-p6","yolov8n-obb", "yolov8s-obb", "yolov8m-obb"," yolov8l-obb", "yolov8x-obb","yolov8n-cls","yolov8s-cls" 
+                       ,"yolov8m-cls", "yolov8l-cls", "yolov8x-cls","yolov9c", "yolov9e","yolov9c-seg", "yolov9e-seg"]
+        if ver in version:
+            self.__yoloVersion = ver+".pt"
+        else :
+            raise FileExistsError("this model of yolo invalid for ultralytics, pleas read http://docs.ultralytics.com/models")
     @property
     def serverIP(self):
         """ return server IP """
