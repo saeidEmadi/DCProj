@@ -22,7 +22,7 @@ def __clientSide(args):
         """ clients default mode : 5 client with Config file params """
         videos = videoController.getCameraOfflineVideos(5)
         for i in range(5):
-            c = Camera(DEBUG = True, device = str(args.device[0]))
+            c = Camera(DEBUG = True)
             c.streamInput(".\\videos\\"+videos[i])      #set video input
             th = threading.Thread(target = c.run)
             th.start()
