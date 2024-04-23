@@ -3,8 +3,6 @@ import socket
 import configparser
 import threading
 import cv2
-import pickle
-import struct
 from ultralytics import YOLO
 import re
 class Camera():
