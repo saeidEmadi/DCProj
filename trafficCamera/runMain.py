@@ -4,7 +4,6 @@ import configparser
 import threading
 import cv2
 from ultralytics import YOLO
-import re
 import time
 class Camera():
     """ Camera Class : \
