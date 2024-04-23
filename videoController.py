@@ -1,5 +1,6 @@
 import os
 import argparse
+import shutil
 
 class VideoController():
     """ this class use for control video versions 
@@ -15,9 +16,9 @@ class VideoController():
         self.__lastIndex = self.__getLastIndex()
 
         try : 
-            if 'videos' not in os.listdir(dest):
-                os.mkdir(os.path.dirname(dest)+"\\videos")
-                print(f"video folder created in : {os.path.dirname(dest)}")
+            if 'videos' not in os.listdir(os.path.abspath(dest)):
+                os.mkdir(os.path.abspath(os.path.dirname(dest))+"\\videos\\")
+                print(f"video folder created in : {os.path.abspath(os.path.dirname(dest))}\\videos\\")
             else :
                 # order video names
                 self.__lastIndex = -1
@@ -27,7 +28,7 @@ class VideoController():
     
     def __fileMover(self, source : str, dest : str) -> bool :
         try :
-            os.replace(source, dest)
+            shutil.move(source, dest)
             return True
         except : 
             return False
@@ -36,19 +37,21 @@ class VideoController():
         """ add video from source to destination Path """
         if os.path.isfile(self.__source) :
             file_name, extension = os.path.splitext(self.__source)
+            file_name = self.__getNemName(extension)
             if self.__fileMover(os.path.realpath(self.__source), \
-                self.__dest+"\\videos\\"+self.__getNemName(extension)) :
-                print(f"mv {os.path.realpath(self.__source)} to {self.__dest}\\videos\\")
+                os.path.abspath(self.__dest)+"\\videos\\"+file_name) :
+                print(f"mv {os.path.realpath(self.__source)} to {os.path.abspath(self.__dest)}\\videos\\{file_name}")
             else :
-                print(f"can\'t mov {os.path.realpath(self.__source)} to {self.__dest}\\videos\\")
+                print(f"can\'t mv {os.path.realpath(self.__source)} to {os.path.abspath(self.__dest)}\\videos\\{file_name}")
         elif os.path.isdir(self.__source) :
             for video in self.__fetchVideos(self.source) :
-                file_name, extension = os.path.splitext(os.path.realpath(video))
-                if self.__fileMover(os.path.realpath(video), \
-                    self.__dest+"\\videos\\"+self.__getNemName(extension)) :
-                    print(f"mv {os.path.realpath(video)} to {self.__dest}\\videos\\")
+                file_name, extension = os.path.splitext(video)
+                file_name = self.__getNemName(extension)
+                if self.__fileMover(os.path.realpath(self.__source)+"\\"+video, \
+                   os.path.abspath(self.__dest)+"\\videos\\"+file_name) :
+                   print(f"mv {os.path.realpath(self.__source)}\\{video} to {os.path.abspath(self.__dest)}\\videos\\{file_name}")
                 else :
-                    print(f"can\'t mov {os.path.realpath(video)} to {self.__dest}\\videos\\")
+                    print(f"can\'t mv {os.path.realpath(self.__source)}\\{video} to {os.path.abspath(self.__dest)}\\videos\\{file_name}")
                     
     def getCameraOfflineVideos(self, numOfClients : int) -> list :
         """ check pair camera's and Client's """
@@ -64,11 +67,11 @@ class VideoController():
 
     def __getLastIndex(self) -> int :
         """ find last index for set new name indexing """
-        
-        videos = self.__fetchVideos(self.__dest+"\\videos")
-        if len(videos) > 0 :
-            file_name, _ = os.path.splitext(videos[-1])
-            return int(''.join(_ for _ in file_name if _.isdigit()))
+        if 'videos' in os.listdir(os.path.abspath(self.__dest)):
+            videos = self.__fetchVideos(self.__dest+"\\videos")
+            if len(videos) > 0 :
+                file_name, _ = os.path.splitext(videos[-1])
+                return int(''.join(_ for _ in file_name if _.isdigit()))
         
         return -1
         
@@ -158,6 +161,6 @@ if __name__ == "__main__" :
         required = True ,help = "find this formats in directory [.mp4|.mkv|etc]")
     
     args = argparser.parse_args()        
-        
+    
     c = VideoController(source = args.source_address[0], dest = args.dest[0])
     c.videoAdder()
