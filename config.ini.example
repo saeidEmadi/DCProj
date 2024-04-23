@@ -1,11 +1,4 @@
-[Traffic Camera]
-yoloVersion = YOLO_VERSION
-confidence = YOLO_CONFIDENCE
-
 [Server]
 server IP = IP_ADDRESS
 port = PORT_NUMBER
 backlogListenVal = IntegerValue #It specifies the number of unaccepted connections that the system will allow before refusing new connections
-
-[DEBUG]
-debug mode = BOOLEAN VALUE | True or False
