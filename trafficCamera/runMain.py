@@ -5,6 +5,7 @@ import threading
 import cv2
 from ultralytics import YOLO
 import re
+import time
 class Camera():
     """ Camera Class : \
         track objects and detect Traffic """
@@ -52,7 +53,10 @@ class Camera():
         self.yoloConf = yoloConf
         self.trafficConf = trafficConf
         self.device = device
-        self.__cv2BufferSize = 100      # CV2 Video Capture Buffer Size
+        self.__cv2BufferSize = 1024      # CV2 Video Capture Buffer Size
+        self.__timeDelayNotify = 5      # delay time for notify | 5 second
+        self.__notifyTimer     = 0      # previous delay time for check
+        self.__trafficNum      = 0      # Max count of objects
 
         if _debug :
             print("\n++[new Camera object]++\n")
@@ -64,6 +68,8 @@ class Camera():
             print(f" Camera : [detection : {self.__detection}]")       
             print(f" Camera : [yolo conf : {self.__yoloConf}]")
             print(f" Camera : [traffic conf : {self.__trafficConf}]")
+            print(f" Camera : [Max count of objects for traffic Conf : {self.__trafficConf}]")
+            print(f" Camera : [period check Traffic Timer : {self.__timeDelayNotify}]")
     
     def netConfig(self, serverIP : str, portNumber : int):
         """ config ip and port """
@@ -113,6 +119,7 @@ class Camera():
     def __modelPredictor(self):
         model = YOLO(self.__yoloVersion)
         cv2.VideoCapture().set(cv2.CAP_PROP_BUFFERSIZE, self.__cv2BufferSize)
+        #cv2.VideoCapture()
         if _debug :
             print(f" Camera : <model Predictor start.>")
             
@@ -135,7 +142,7 @@ class Camera():
                         count += 1
                         cv2.putText(frame, className[int(box.cls[0])], [x1, y1], cv2.FONT_HERSHEY_SIMPLEX,\
                             fontScale = 1, color = (255, 0, 0), thickness = 2)
-                self.__checkTraffic(count)
+                self.__timerChecker(count)
                 # video Streaming
                 """ if _stream : 
                     piklFrema = pickle.dumps(frame)
@@ -166,7 +173,7 @@ class Camera():
                 for r in results:
                     for _ in r.boxes:
                         count += 1
-                    self.__checkTraffic(count)
+                    self.__timerChecker(count)
                 # video Streaming
                 """if _stream : 
                     piklFrema = pickle.dumps(frame)
@@ -196,13 +203,21 @@ class Camera():
         # self.__socket.send(msg.encode())
     """
     
+    def __timerChecker(self, count) :
+        """ check traffic checker time lag """
+        if time.time() - self.__notifyTimer - self.__timeDelayNotify  > 0.01 :
+            if _debug :
+                print(f" Camera : < lag of time period  : {time.time() - self.__notifyTimer - self.__timeDelayNotify} >")
+            self.__notifyTimer = time.time()
+            self.__checkTraffic(count)
+    
     def __checkTraffic(self, count : int):
         if _debug :
             print(f" Camera : < Max Count : {self.__trafficConf} >")
             print(f" Camera : < count No. : {count} >")
             print(f" Camera : < thread NO : {threading.current_thread().ident} >")
             
-        if count > self.__trafficConf :
+        if count > self.__trafficConf and count > self.__trafficNum :
             try :
                 self.__socket.send((f'camera NO. {threading.current_thread().ident} | count : {count} | traffic : +').encode())
             except:
@@ -285,6 +300,7 @@ class Camera():
             self.__yoloVersion = ver+".pt"
         else :
             raise FileExistsError("this model of yolo invalid for ultralytics, pleas read http://docs.ultralytics.com/models")
+    
     @property
     def serverIP(self):
         """ return server IP """
