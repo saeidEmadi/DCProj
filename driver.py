@@ -28,8 +28,14 @@ def __clientSide(args):
             th.start()
     else :
         """ clients create with args input """  
-        videos = videoController.getCameraOfflineVideos(args.client[0])
-        for i in range(args.client[0]):
+        numOfClients = 5
+        if type(args.client) == int :
+            numOfClients = args.client
+        elif type(args.client) == list :
+            numOfClients = args.client[0]
+            
+        videos = videoController.getCameraOfflineVideos(numOfClients)
+        for i in range(numOfClients):
             c = Camera(serverIP = str(args.host[0]), portNumber = int(args.port[0]), \
                 yoloVersion = args.yolov[0], yoloConf = args.yoloConf[0], trafficConf = args.trafficConf[0], \
                 detectionLabels = args.detect, show = args.stream, DEBUG = args.debug, device = str(args.device[0]))
@@ -60,7 +66,7 @@ if __name__ == "__main__":
         help = "traffic Max confidence (default : 8)", default = [8])
     argparser.add_argument('-d', '--detect', metavar = 'coco class name\'s', default = 'vehicles', nargs = '*', \
         help = "detect all objects in ms-COCO or only vehicles (example : vehicles person [etc.]], default = vehicles)")
-    argparser.add_argument('-c', '--client', metavar = 'INT', type = list, default = [5], nargs = 1, \
+    argparser.add_argument('-c', '--client', metavar = 'INT', type = int, default = 5, nargs = 1, \
         help = "number of clients ,[default = 5]")
     argparser.add_argument('--test', action = "store_true", \
         help = "flag for Enable defaults parameters run :: \n "+config['Server']['server IP'] \
@@ -70,10 +76,10 @@ if __name__ == "__main__":
     argparser.add_argument('--device',metavar = "core" , nargs = 1, type = str, required = True, \
         help = "yolo gpu core  or CPU [ex. cpu , cuda:0]")
     args = argparser.parse_args()
-
-
+    
     serverThread = threading.Thread(target = __serverSide, args = (args,))
     ClientThread = threading.Thread(target = __clientSide, args = (args,))
     serverThread.start()
-    ClientThread.start()    
+    ClientThread.start()
+    
     
